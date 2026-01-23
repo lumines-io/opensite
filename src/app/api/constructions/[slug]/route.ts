@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import config from '@payload-config';
+import { REST_DELETE, REST_PATCH, REST_PUT } from '@payloadcms/next/routes';
 import { withApiHandler, createErrorResponse } from '@/lib/api-utils';
 import {
   withCache,
@@ -19,6 +20,24 @@ interface ChangelogEntry {
 interface ConstructionWithChangelog {
   [key: string]: unknown;
   recentChangelog: ChangelogEntry[];
+}
+
+/**
+ * Check if the slug parameter looks like a Payload document ID (numeric or UUID)
+ * This helps differentiate between:
+ * - /api/constructions/my-construction-slug (human-readable slug)
+ * - /api/constructions/123 (Payload ID for admin operations)
+ */
+function isPayloadId(slug: string): boolean {
+  // Numeric IDs
+  if (/^\d+$/.test(slug)) {
+    return true;
+  }
+  // UUID format (used by some Payload setups)
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)) {
+    return true;
+  }
+  return false;
 }
 
 // Fetch construction details from database
@@ -76,6 +95,22 @@ export const GET = withApiHandler<RouteContext>(async (
   context: RouteContext
 ) => {
   const { slug } = await context.params;
+
+  // If it looks like a Payload ID, let Payload handle it by fetching directly
+  if (isPayloadId(slug)) {
+    const payload = await getPayload({ config });
+    try {
+      const construction = await payload.findByID({
+        collection: 'constructions',
+        id: slug,
+        depth: 2,
+      });
+      return NextResponse.json(construction);
+    } catch {
+      return createErrorResponse('Construction not found', 404, { code: 'NOT_FOUND' });
+    }
+  }
+
   const cacheKey = getConstructionCacheKey(slug);
 
   const { data: construction, fromCache } = await withCache<ConstructionWithChangelog | null>(
@@ -106,3 +141,21 @@ export const GET = withApiHandler<RouteContext>(async (
 
   return response;
 });
+
+/**
+ * Forward PATCH requests to Payload's REST API handler
+ * This allows PayloadCMS admin to update constructions through this route
+ */
+export const PATCH = REST_PATCH(config);
+
+/**
+ * Forward PUT requests to Payload's REST API handler
+ * This allows PayloadCMS admin to update constructions through this route
+ */
+export const PUT = REST_PUT(config);
+
+/**
+ * Forward DELETE requests to Payload's REST API handler
+ * This allows PayloadCMS admin to delete constructions through this route
+ */
+export const DELETE = REST_DELETE(config);
