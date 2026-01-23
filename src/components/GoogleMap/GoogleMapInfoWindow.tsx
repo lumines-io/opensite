@@ -252,95 +252,100 @@ export function GoogleMapInfoWindow({
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
       getPixelPositionOffset={(width, height) => ({
         x: -(width / 2),
-        y: -(height + 15),
+        y: -(height + 15 - 12), // Adjust for padding
       })}
     >
+      {/* Invisible padding wrapper - extends hover area by 12px */}
       <div
-        ref={containerRef}
-        className={`
-          min-w-[260px] max-w-[320px] bg-card rounded-lg shadow-lg border border-border
-          transition-all duration-150 ease-out
-          ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95'}
-        `}
+        className="p-3 -m-3"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Close button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted/80 transition-colors text-muted-foreground hover:text-foreground z-10"
-          aria-label="Close"
+        <div
+          ref={containerRef}
+          className={`
+            relative min-w-[260px] max-w-[320px] bg-card rounded-lg shadow-lg border border-border
+            transition-all duration-150 ease-out
+            ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95'}
+          `}
         >
-          <CloseIcon />
-        </button>
+          {/* Close button */}
+          <button
+            onClick={handleClose}
+            className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted/80 transition-colors text-muted-foreground hover:text-foreground z-10"
+            aria-label="Close"
+          >
+            <CloseIcon />
+          </button>
 
-        {/* Sponsor badge for private constructions */}
-        {isPrivate && (
-          <div className="px-3 pt-2">
-            <SponsorBadge organizationName={construction.organizationName} />
-          </div>
-        )}
-
-        {/* Clickable Header */}
-        <button
-          onClick={handleNavigate}
-          className="group flex items-start gap-2.5 p-3 pb-2 pr-8 hover:bg-muted/50 rounded-t-lg transition-colors cursor-pointer w-full text-left"
-        >
-          <TypeBadge
-            type={construction.constructionType}
-            category={construction.constructionCategory}
-            privateType={construction.privateType}
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-sm text-card-foreground leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                {construction.title}
-              </h3>
-              <ExternalLinkIcon />
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">{typeLabel}</p>
-          </div>
-        </button>
-
-        {/* Excerpt */}
-        {construction.excerpt && (
-          <div className="px-3 pb-2">
-            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-              {construction.excerpt}
-            </p>
-          </div>
-        )}
-
-        {/* Status & Progress */}
-        <div className="px-3 pb-3 pt-2 border-t border-border space-y-2">
-          <div className="flex items-center justify-between">
-            <StatusBadge status={construction.constructionStatus} />
-            <span className="text-xs font-semibold text-card-foreground">
-              {construction.progress}%
-            </span>
-          </div>
-          <ProgressBar
-            progress={construction.progress}
-            statusColor={statusColor}
-          />
-
-          {/* Date info */}
-          {hasDateInfo && (
-            <div className="text-xs text-muted-foreground pt-1">
-              {construction.startDate && (
-                <span>Bắt đầu: {formatDateVN(construction.startDate)}</span>
-              )}
-              {construction.startDate && construction.expectedEndDate && ' • '}
-              {construction.expectedEndDate && (
-                <span>Dự kiến: {formatDateVN(construction.expectedEndDate)}</span>
-              )}
+          {/* Sponsor badge for private constructions */}
+          {isPrivate && (
+            <div className="px-3 pt-2">
+              <SponsorBadge organizationName={construction.organizationName} />
             </div>
           )}
-        </div>
 
-        {/* Pointer triangle */}
-        <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card" />
-        <div className="absolute left-1/2 -translate-x-1/2 -bottom-[9px] w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border -z-10" />
+          {/* Clickable Header */}
+          <button
+            onClick={handleNavigate}
+            className="group flex items-start gap-2.5 p-3 pb-2 pr-8 hover:bg-muted/50 rounded-t-lg transition-colors cursor-pointer w-full text-left"
+          >
+            <TypeBadge
+              type={construction.constructionType}
+              category={construction.constructionCategory}
+              privateType={construction.privateType}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold text-sm text-card-foreground leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                  {construction.title}
+                </h3>
+                <ExternalLinkIcon />
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">{typeLabel}</p>
+            </div>
+          </button>
+
+          {/* Excerpt */}
+          {construction.excerpt && (
+            <div className="px-3 pb-2">
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                {construction.excerpt}
+              </p>
+            </div>
+          )}
+
+          {/* Status & Progress */}
+          <div className="px-3 pb-3 pt-2 border-t border-border space-y-2">
+            <div className="flex items-center justify-between">
+              <StatusBadge status={construction.constructionStatus} />
+              <span className="text-xs font-semibold text-card-foreground">
+                {construction.progress}%
+              </span>
+            </div>
+            <ProgressBar
+              progress={construction.progress}
+              statusColor={statusColor}
+            />
+
+            {/* Date info */}
+            {hasDateInfo && (
+              <div className="text-xs text-muted-foreground pt-1">
+                {construction.startDate && (
+                  <span>Bắt đầu: {formatDateVN(construction.startDate)}</span>
+                )}
+                {construction.startDate && construction.expectedEndDate && ' • '}
+                {construction.expectedEndDate && (
+                  <span>Dự kiến: {formatDateVN(construction.expectedEndDate)}</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Pointer triangle */}
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card" />
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-[9px] w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border -z-10" />
+        </div>
       </div>
     </OverlayView>
   );
