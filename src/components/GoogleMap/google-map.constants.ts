@@ -49,7 +49,6 @@ interface MapTypeStyle {
 // Google Maps dark mode style
 export const GOOGLE_MAP_DARK_STYLE: MapTypeStyle[] = [
   { elementType: 'geometry', stylers: [{ color: '#212121' }] },
-  { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
   { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
   {
@@ -71,25 +70,44 @@ export const GOOGLE_MAP_DARK_STYLE: MapTypeStyle[] = [
     elementType: 'labels.text.fill',
     stylers: [{ color: '#bdbdbd' }],
   },
+  // Hide all POI icons and labels
   {
     featureType: 'poi',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#757575' }],
+    elementType: 'labels.icon',
+    stylers: [{ visibility: 'off' }],
   },
+  {
+    featureType: 'poi',
+    elementType: 'labels.text',
+    stylers: [{ visibility: 'off' }],
+  },
+  // But show government POIs
+  {
+    featureType: 'poi.government',
+    elementType: 'labels.icon',
+    stylers: [{ visibility: 'on' }],
+  },
+  {
+    featureType: 'poi.government',
+    elementType: 'labels.text',
+    stylers: [{ visibility: 'on' }],
+  },
+  {
+    featureType: 'poi.government',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#9e9e9e' }],
+  },
+  // Keep park geometry visible (but no labels)
   {
     featureType: 'poi.park',
     elementType: 'geometry',
     stylers: [{ color: '#181818' }],
   },
+  // Hide transit icons (we show our own metro/station data)
   {
-    featureType: 'poi.park',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#616161' }],
-  },
-  {
-    featureType: 'poi.park',
-    elementType: 'labels.text.stroke',
-    stylers: [{ color: '#1b1b1b' }],
+    featureType: 'transit',
+    elementType: 'labels.icon',
+    stylers: [{ visibility: 'off' }],
   },
   {
     featureType: 'road',
@@ -138,8 +156,18 @@ export const GOOGLE_MAP_DARK_STYLE: MapTypeStyle[] = [
   },
 ];
 
-// Google Maps light mode style (default/empty)
-export const GOOGLE_MAP_LIGHT_STYLE: MapTypeStyle[] = [];
+// Google Maps light mode style - hide POIs except government
+export const GOOGLE_MAP_LIGHT_STYLE: MapTypeStyle[] = [
+  // Hide all POI icons
+  { featureType: 'poi', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+  // Hide all POI labels
+  { featureType: 'poi', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
+  // But show government POIs
+  { featureType: 'poi.government', elementType: 'labels.icon', stylers: [{ visibility: 'on' }] },
+  { featureType: 'poi.government', elementType: 'labels.text', stylers: [{ visibility: 'on' }] },
+  // Hide transit labels (we show our own metro/station data)
+  { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+];
 
 // Status colors for construction markers
 export const STATUS_COLORS: Record<string, string> = {
