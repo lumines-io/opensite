@@ -27,6 +27,12 @@ import { CronJobLogs } from './collections/CronJobLogs';
 import { AnalyticsEvents } from './collections/AnalyticsEvents';
 import { Logs } from './collections/Logs';
 
+// Billing Collections
+import { CreditTransactions } from './collections/CreditTransactions';
+import { CreditTopupHistory } from './collections/CreditTopupHistory';
+import { PromotionPackages } from './collections/PromotionPackages';
+import { Promotions } from './collections/Promotions';
+
 // Globals
 import { Settings } from './globals/Settings';
 import { AdSettings } from './globals/AdSettings';
@@ -165,6 +171,11 @@ export default buildConfig({
     CronJobLogs,
     AnalyticsEvents,
     Logs,
+    // Billing Collections
+    CreditTransactions,
+    CreditTopupHistory,
+    PromotionPackages,
+    Promotions,
   ],
   globals: [Settings, AdSettings],
   editor: lexicalEditor(),

@@ -269,6 +269,83 @@ export const Organizations: CollectionConfig = {
         },
       ],
     },
+
+    // Billing & Credit System
+    {
+      name: 'billing',
+      type: 'group',
+      admin: {
+        description: 'Credit balance and billing information',
+      },
+      fields: [
+        {
+          name: 'stripeCustomerId',
+          type: 'text',
+          admin: {
+            readOnly: true,
+            description: 'Stripe customer ID',
+          },
+        },
+        {
+          name: 'creditBalance',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+            description: 'Current credit balance (VND)',
+          },
+        },
+        {
+          name: 'totalCreditsLoaded',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+            description: 'Total credits ever loaded (VND)',
+          },
+        },
+        {
+          name: 'totalCreditsSpent',
+          type: 'number',
+          defaultValue: 0,
+          admin: {
+            readOnly: true,
+            description: 'Total credits ever spent (VND)',
+          },
+        },
+        {
+          name: 'billingEmail',
+          type: 'email',
+          admin: {
+            description: 'Email for billing notifications',
+          },
+        },
+        {
+          name: 'lowBalanceAlertThreshold',
+          type: 'number',
+          defaultValue: 500000,
+          admin: {
+            description: 'Send alert when balance drops below this amount (VND)',
+          },
+        },
+        {
+          name: 'lowBalanceAlertEnabled',
+          type: 'checkbox',
+          defaultValue: true,
+          admin: {
+            description: 'Enable low balance email alerts',
+          },
+        },
+        {
+          name: 'lastLowBalanceAlertAt',
+          type: 'date',
+          admin: {
+            readOnly: true,
+            description: 'Last time a low balance alert was sent',
+          },
+        },
+      ],
+    },
   ],
   hooks: {
     beforeChange: [

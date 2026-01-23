@@ -690,6 +690,27 @@ export const Constructions: CollectionConfig = {
       ],
     },
 
+    // Active Promotion (Private only)
+    {
+      name: 'activePromotion',
+      type: 'relationship',
+      relationTo: 'promotions',
+      admin: {
+        readOnly: true,
+        condition: (data) => data?.constructionCategory === 'private',
+        description: 'Currently active promotion for this construction',
+      },
+    },
+    {
+      name: 'promotionExpiresAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+        condition: (data) => data?.constructionCategory === 'private',
+        description: 'When the current promotion expires',
+      },
+    },
+
     // Review Metadata (Private only)
     {
       name: 'review',
