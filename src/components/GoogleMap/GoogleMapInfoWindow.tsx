@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import { InfoWindow } from '@react-google-maps/api';
 import {
   STATUS_COLORS,
@@ -25,8 +25,6 @@ interface GoogleMapInfoWindowProps {
   feature: MapFeature;
   position: LatLng;
   onClose: () => void;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
 }
 
 /**
@@ -503,23 +501,57 @@ export function GoogleMapInfoWindow({
   feature,
   position,
   onClose,
-  onMouseEnter,
-  onMouseLeave,
 }: GoogleMapInfoWindowProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const { startTransition } = usePageTransition();
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const detailsUrl = feature.slug
     ? `/details/${feature.slug}`
     : `/details/${feature.id}`;
 
-  const handleMouseEnter = useCallback(() => {
-    onMouseEnter?.();
-  }, [onMouseEnter]);
+  // Animate in on mount
+  useEffect(() => {
+    // Small delay to ensure the DOM is ready for animation
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 10);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle click outside to close popup
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        handleClose();
+      }
+    };
+
+    // Add listener with a small delay to avoid immediate closure
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    // Wait for animation to complete before calling onClose
+    setTimeout(() => {
+      onClose();
+    }, 150);
+  }, [onClose]);
 
   const handleMouseLeave = useCallback(() => {
-    onMouseLeave?.();
-  }, [onMouseLeave]);
+    // When mouse leaves the popup, close it
+    handleClose();
+  }, [handleClose]);
 
   const handleNavigate = useCallback(
     (e: React.MouseEvent) => {
@@ -547,26 +579,40 @@ export function GoogleMapInfoWindow({
   return (
     <InfoWindow
       position={position}
-      onCloseClick={onClose}
+      onCloseClick={handleClose}
       options={{
         pixelOffset: new google.maps.Size(0, -10),
-        disableAutoPan: false,
+        disableAutoPan: true,
       }}
     >
-      <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-        {isConstruction(feature) ? (
-          <ConstructionContent
-            construction={feature}
-            onNavigate={handleNavigate}
-            containerRef={containerRef}
-          />
-        ) : isDevelopment(feature) ? (
-          <DevelopmentContent
-            development={feature}
-            onNavigate={handleNavigate}
-            containerRef={containerRef}
-          />
-        ) : null}
+      {/* Outer wrapper with 12px padding for better hover detection */}
+      <div
+        ref={wrapperRef}
+        className="p-3 -m-3"
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Inner content with animation */}
+        <div
+          className={`transition-all duration-150 ${
+            isVisible && !isClosing
+              ? 'opacity-100 scale-100 ease-out'
+              : 'opacity-0 scale-95 ease-in'
+          }`}
+        >
+          {isConstruction(feature) ? (
+            <ConstructionContent
+              construction={feature}
+              onNavigate={handleNavigate}
+              containerRef={containerRef}
+            />
+          ) : isDevelopment(feature) ? (
+            <DevelopmentContent
+              development={feature}
+              onNavigate={handleNavigate}
+              containerRef={containerRef}
+            />
+          ) : null}
+        </div>
       </div>
     </InfoWindow>
   );

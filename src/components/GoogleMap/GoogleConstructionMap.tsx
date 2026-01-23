@@ -34,9 +34,8 @@ import {
   featurePassesFilters,
   isGeometryInBounds,
   geoJsonPathToLatLngPath,
-  getGeometryCenter,
-  getMarkerColor,
   createMarkerIcon,
+  createAnimatedPolylinesForFeatures,
 } from './google-map.utils';
 import { GoogleMapInfoWindow } from './GoogleMapInfoWindow';
 import { GoogleMapLegend } from './GoogleMapLegend';
@@ -46,9 +45,6 @@ import { useUserLocation } from '../Map/useUserLocation';
 
 // Re-export types
 export type { Construction, ConstructionAlert } from './google-map.types';
-
-// Delay before hiding popup when mouse leaves
-const POPUP_HIDE_DELAY = 150;
 
 // Debounce delay for viewport changes
 const VIEWPORT_UPDATE_DELAY = 300;
@@ -79,6 +75,7 @@ export function GoogleConstructionMap({
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const viewportTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasFlownToUserLocation = useRef(false);
+  const animatedPolylinesCleanupRef = useRef<(() => void) | null>(null);
 
   const { theme } = useTheme();
 
@@ -103,7 +100,6 @@ export function GoogleConstructionMap({
   // Popup state
   const [activeFeature, setActiveFeature] = useState<MapFeature | null>(null);
   const [popupPosition, setPopupPosition] = useState<LatLng | null>(null);
-  const [isMouseInPopup, setIsMouseInPopup] = useState(false);
 
   // Filter state
   const [visibleTypes, setVisibleTypes] = useState<Set<string>>(
@@ -316,16 +312,44 @@ export function GoogleConstructionMap({
       });
     });
 
-    // Handle mouseout
+    // Handle mouseout - just reset cursor, popup handles its own closing
     dataLayer.addListener('mouseout', () => {
       map.getDiv().style.cursor = '';
-      scheduleHidePopup();
     });
 
     return () => {
       dataLayer.setMap(null);
     };
   }, [geojsonData, visibleTypes, visibleStatuses, visibleSourceCollections, visibleDevelopmentTypes, currentZoom, onSelectConstruction]);
+
+  // Create animated polylines for in-progress LineString constructions
+  useEffect(() => {
+    if (!mapRef.current || features.length === 0) return;
+
+    // Cleanup previous animated polylines
+    if (animatedPolylinesCleanupRef.current) {
+      animatedPolylinesCleanupRef.current();
+      animatedPolylinesCleanupRef.current = null;
+    }
+
+    // Create new animated polylines
+    const cleanup = createAnimatedPolylinesForFeatures(
+      mapRef.current,
+      features,
+      visibleTypes,
+      visibleStatuses,
+      visibleSourceCollections
+    );
+
+    animatedPolylinesCleanupRef.current = cleanup;
+
+    return () => {
+      if (animatedPolylinesCleanupRef.current) {
+        animatedPolylinesCleanupRef.current();
+        animatedPolylinesCleanupRef.current = null;
+      }
+    };
+  }, [features, visibleTypes, visibleStatuses, visibleSourceCollections]);
 
   // Add route polyline
   useEffect(() => {
@@ -392,23 +416,6 @@ export function GoogleConstructionMap({
     };
   }, []);
 
-  // Schedule popup hide with delay
-  const scheduleHidePopup = useCallback(() => {
-    if (isMouseInPopup) return;
-
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-    }
-
-    hideTimeoutRef.current = setTimeout(() => {
-      if (!isMouseInPopup) {
-        setActiveFeature(null);
-        setPopupPosition(null);
-      }
-      hideTimeoutRef.current = null;
-    }, POPUP_HIDE_DELAY);
-  }, [isMouseInPopup]);
-
   // Hide popup immediately
   const hidePopup = useCallback(() => {
     if (hideTimeoutRef.current) {
@@ -417,7 +424,6 @@ export function GoogleConstructionMap({
     }
     setActiveFeature(null);
     setPopupPosition(null);
-    setIsMouseInPopup(false);
   }, []);
 
   // Compute visible features
@@ -572,20 +578,6 @@ export function GoogleConstructionMap({
     [features, onSelectConstruction]
   );
 
-  // Handle popup mouse events
-  const handlePopupMouseEnter = useCallback(() => {
-    setIsMouseInPopup(true);
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-      hideTimeoutRef.current = null;
-    }
-  }, []);
-
-  const handlePopupMouseLeave = useCallback(() => {
-    setIsMouseInPopup(false);
-    scheduleHidePopup();
-  }, [scheduleHidePopup]);
-
   // Loading state
   if (loadError) {
     return (
@@ -633,8 +625,6 @@ export function GoogleConstructionMap({
             feature={activeFeature}
             position={popupPosition}
             onClose={hidePopup}
-            onMouseEnter={handlePopupMouseEnter}
-            onMouseLeave={handlePopupMouseLeave}
           />
         )}
       </GoogleMap>

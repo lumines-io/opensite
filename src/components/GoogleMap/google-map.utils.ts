@@ -205,6 +205,33 @@ export function getMarkerColor(feature: MapFeature): string {
 }
 
 /**
+ * SVG paths for construction type icons
+ * Each icon is designed within a 24x24 viewBox
+ */
+const TYPE_ICON_PATHS: Record<string, string> = {
+  // Highway - road with lanes
+  highway: 'M4 12h16M4 8h16M4 16h16M8 4v16M16 4v16',
+  // Metro - train/subway icon
+  metro: 'M8 4h8l2 4v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8l2-4zm0 12h1m6 0h1M9 20l-2 2m8-2l2 2',
+  // Bridge - arch bridge structure
+  bridge: 'M2 16h20M5 16V8a7 7 0 0114 0v8M5 12h14M8 16v-4m4 4V8m4 8v-4',
+  // Tunnel - tunnel entrance
+  tunnel: 'M4 20h16M4 20V10a8 8 0 1116 0v10M8 20v-6m8 6v-6M12 8v4',
+  // Interchange - complex junction
+  interchange: 'M12 2v6m0 8v6M2 12h6m8 0h6M6 6l4 4m4 4l4 4M18 6l-4 4m-4 4l-4 4',
+  // Road - simple road
+  road: 'M4 4l4 16m8-16l4 16M9 4h6M8 10h8M7 16h10',
+  // Station - station building
+  station: 'M4 20h16M6 20V8l6-4 6 4v12M10 20v-6h4v6M9 10h.01M15 10h.01',
+  // Metro station - platform with train
+  metro_station: 'M3 18h18M6 18V9l6-3 6 3v9M10 14h4M12 6v4',
+  // Freeway exit - arrow pointing off
+  freeway_exit: 'M12 3v12m0 0l-4-4m4 4l4-4M5 21l7-4 7 4',
+  // Other - generic marker
+  other: 'M12 2a10 10 0 110 20 10 10 0 010-20zm0 5v6m0 4h.01',
+};
+
+/**
  * Create SVG marker icon for Google Maps
  */
 export function createMarkerIcon(
@@ -214,6 +241,60 @@ export function createMarkerIcon(
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/>
+    </svg>
+  `;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(size, size),
+    anchor: new google.maps.Point(size / 2, size / 2),
+  };
+}
+
+/**
+ * Create type-specific SVG marker icon for Google Maps
+ * Each construction type has its own distinctive icon
+ */
+export function createTypeIcon(
+  type: string,
+  color: string,
+  size: number = 28
+): google.maps.Icon {
+  const iconPath = TYPE_ICON_PATHS[type] || TYPE_ICON_PATHS['other'];
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="11" fill="${color}" stroke="white" stroke-width="1.5"/>
+      <g transform="scale(0.55) translate(9.8, 9.8)" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="${iconPath}"/>
+      </g>
+    </svg>
+  `;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(size, size),
+    anchor: new google.maps.Point(size / 2, size / 2),
+  };
+}
+
+/**
+ * Create animated type-specific SVG marker icon (pulsing for in-progress)
+ */
+export function createAnimatedTypeIcon(
+  type: string,
+  color: string,
+  size: number = 28
+): google.maps.Icon {
+  const iconPath = TYPE_ICON_PATHS[type] || TYPE_ICON_PATHS['other'];
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="11" fill="${color}" stroke="white" stroke-width="1.5">
+        <animate attributeName="r" values="9;11;9" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0.7;1" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <g transform="scale(0.55) translate(9.8, 9.8)" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="${iconPath}"/>
+      </g>
     </svg>
   `;
   return {
@@ -313,6 +394,7 @@ export function getFeatureStyle(
   let color: string;
   let isPulsing = false;
   let isFeatured = false;
+  let constructionType = 'other';
 
   if (sourceCollection === 'developments') {
     // Development styling
@@ -333,6 +415,7 @@ export function getFeatureStyle(
     const status = feature.getProperty('constructionStatus') as string;
 
     color = getTypeColor(type);
+    constructionType = type;
     isPulsing = status === 'in-progress';
   }
 
@@ -341,8 +424,11 @@ export function getFeatureStyle(
     case 'Point':
       // Use smaller icons for detail markers (metro stations, freeway exits)
       if (isDetailMarker) {
+        const detailType = feature.getProperty('constructionType') as string;
         return {
-          icon: createDetailMarkerIcon(color, 14),
+          icon: isPulsing
+            ? createAnimatedTypeIcon(detailType, color, 18)
+            : createTypeIcon(detailType, color, 18),
           clickable: true,
         };
       }
@@ -353,6 +439,16 @@ export function getFeatureStyle(
           clickable: true,
         };
       }
+      // Use type-specific icons for constructions
+      if (sourceCollection === 'constructions') {
+        return {
+          icon: isPulsing
+            ? createAnimatedTypeIcon(constructionType, color, 24)
+            : createTypeIcon(constructionType, color, 24),
+          clickable: true,
+        };
+      }
+      // Default marker for other features (developments without featured status)
       return {
         icon: isPulsing
           ? createPulsingMarkerIcon(color, 20)
@@ -506,4 +602,166 @@ export function routeToGooglePath(
   route: GeoJSON.LineString
 ): google.maps.LatLngLiteral[] {
   return geoJsonPathToLatLngPath(route.coordinates as [number, number][]);
+}
+
+/**
+ * Create an animated polyline with moving dashes (for in-progress constructions)
+ * Returns the polyline and an interval ID for cleanup
+ */
+export function createAnimatedPolyline(
+  map: google.maps.Map,
+  path: google.maps.LatLngLiteral[],
+  color: string,
+  strokeWeight: number = 5
+): { polyline: google.maps.Polyline; intervalId: ReturnType<typeof setInterval> } {
+  // Create dash symbol for animation
+  const dashSymbol: google.maps.Symbol = {
+    path: 'M 0,-1 0,1',
+    strokeOpacity: 1,
+    strokeWeight: strokeWeight,
+    scale: 4,
+  };
+
+  // Create base polyline (solid line underneath)
+  const basePolyline = new google.maps.Polyline({
+    path,
+    strokeColor: color,
+    strokeOpacity: 0.3,
+    strokeWeight: strokeWeight + 2,
+    map,
+  });
+
+  // Create animated polyline with dashed line
+  const animatedPolyline = new google.maps.Polyline({
+    path,
+    strokeOpacity: 0,
+    strokeWeight: 0,
+    icons: [
+      {
+        icon: dashSymbol,
+        offset: '0',
+        repeat: '20px',
+      },
+    ],
+    map,
+  });
+
+  // Set dash color
+  animatedPolyline.set('strokeColor', color);
+
+  // Animate the dash offset
+  let offset = 0;
+  const intervalId = setInterval(() => {
+    offset = (offset + 1) % 200;
+    const icons = animatedPolyline.get('icons') as google.maps.IconSequence[];
+    if (icons && icons.length > 0) {
+      icons[0].offset = offset / 2 + '%';
+      animatedPolyline.set('icons', icons);
+    }
+  }, 50);
+
+  // Return a combined polyline object with cleanup method
+  return {
+    polyline: animatedPolyline,
+    intervalId,
+  };
+}
+
+/**
+ * Create animated polylines for all in-progress LineString features
+ * Returns cleanup function to remove polylines and stop animations
+ */
+export function createAnimatedPolylinesForFeatures(
+  map: google.maps.Map,
+  features: ConstructionFeature[],
+  visibleTypes: Set<string>,
+  visibleStatuses: Set<string>,
+  visibleSourceCollections: Set<string>
+): () => void {
+  const polylines: google.maps.Polyline[] = [];
+  const intervalIds: ReturnType<typeof setInterval>[] = [];
+  const basePolylines: google.maps.Polyline[] = [];
+
+  for (const feature of features) {
+    // Only process constructions that are in-progress and LineString geometry
+    if (
+      feature.properties.sourceCollection !== 'constructions' ||
+      feature.geometry.type !== 'LineString'
+    ) {
+      continue;
+    }
+
+    const props = feature.properties;
+    if (!isConstruction(props)) continue;
+
+    // Check visibility filters
+    if (!visibleSourceCollections.has('constructions')) continue;
+    if (!visibleTypes.has(props.constructionType)) continue;
+    if (!visibleStatuses.has(props.constructionStatus)) continue;
+
+    // Only animate in-progress constructions
+    if (props.constructionStatus !== 'in-progress') continue;
+
+    const coords = feature.geometry.coordinates as [number, number][];
+    const path = geoJsonPathToLatLngPath(coords);
+    const color = getTypeColor(props.constructionType);
+
+    // Create base polyline (solid line underneath)
+    const basePolyline = new google.maps.Polyline({
+      path,
+      strokeColor: color,
+      strokeOpacity: 0.3,
+      strokeWeight: 7,
+      map,
+      zIndex: 1,
+    });
+    basePolylines.push(basePolyline);
+
+    // Create dash symbol for animation
+    const dashSymbol: google.maps.Symbol = {
+      path: 'M 0,-1 0,1',
+      strokeOpacity: 1,
+      strokeColor: color,
+      strokeWeight: 4,
+      scale: 4,
+    };
+
+    // Create animated polyline with dashed line
+    const animatedPolyline = new google.maps.Polyline({
+      path,
+      strokeOpacity: 0,
+      strokeWeight: 0,
+      icons: [
+        {
+          icon: dashSymbol,
+          offset: '0',
+          repeat: '20px',
+        },
+      ],
+      map,
+      zIndex: 2,
+    });
+
+    polylines.push(animatedPolyline);
+
+    // Animate the dash offset
+    let offset = 0;
+    const intervalId = setInterval(() => {
+      offset = (offset + 1) % 200;
+      const icons = animatedPolyline.get('icons') as google.maps.IconSequence[];
+      if (icons && icons.length > 0) {
+        icons[0].offset = offset / 2 + '%';
+        animatedPolyline.set('icons', icons);
+      }
+    }, 50);
+
+    intervalIds.push(intervalId);
+  }
+
+  // Return cleanup function
+  return () => {
+    polylines.forEach((p) => p.setMap(null));
+    basePolylines.forEach((p) => p.setMap(null));
+    intervalIds.forEach((id) => clearInterval(id));
+  };
 }
