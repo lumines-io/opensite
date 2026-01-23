@@ -12,8 +12,15 @@ export const MAP_STYLES = {
 export const DEFAULT_CENTER: [number, number] = [106.6297, 10.8231];
 export const DEFAULT_ZOOM = 11;
 
+// Vietnam center (for initial whole-country view)
+export const VIETNAM_CENTER: [number, number] = [106.0, 16.0];
+export const VIETNAM_ZOOM = 5.5;
+
 // User location zoom level
 export const USER_LOCATION_ZOOM = 13;
+
+// LocalStorage key for saved city
+export const SAVED_CITY_KEY = 'opensite-preferred-city';
 
 // Major cities in Vietnam for location fallback
 export const VIETNAM_CITIES = {

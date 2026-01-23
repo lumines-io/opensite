@@ -6,7 +6,7 @@ import type { MapRef, MapMouseEvent } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { useTheme } from '../ThemeProvider';
-import { MAP_STYLES, DEFAULT_CENTER, DEFAULT_ZOOM, USER_LOCATION_ZOOM, INTERACTIVE_LAYERS, TYPE_COLORS, STATUS_COLORS, CATEGORY_COLORS } from './construction-map.constants';
+import { MAP_STYLES, DEFAULT_CENTER, DEFAULT_ZOOM, USER_LOCATION_ZOOM, VIETNAM_CENTER, VIETNAM_ZOOM, INTERACTIVE_LAYERS, TYPE_COLORS, STATUS_COLORS, CATEGORY_COLORS } from './construction-map.constants';
 import type { CityId } from './construction-map.constants';
 import type { Construction, ConstructionMapProps, Coordinates } from './construction-map.types';
 import { useMapLayers, useRouteLayer, useLayerFilters, type VisibilityFilters } from './useMapLayers';
@@ -59,7 +59,12 @@ export function ConstructionMap({
     coordinates: userCoordinates,
     showCitySelector,
     handleCitySelect,
+    savedCityId,
   } = useUserLocation();
+
+  // Determine initial view: use saved city coordinates or Vietnam-wide view
+  const effectiveInitialCenter = savedCityId ? userCoordinates || initialCenter : VIETNAM_CENTER;
+  const effectiveInitialZoom = savedCityId ? USER_LOCATION_ZOOM : VIETNAM_ZOOM;
 
   // Map state
   const [loaded, setLoaded] = useState(false);
@@ -496,9 +501,9 @@ export function ConstructionMap({
         ref={mapRef}
         mapboxAccessToken={accessToken}
         initialViewState={{
-          longitude: initialCenter[0],
-          latitude: initialCenter[1],
-          zoom: initialZoom,
+          longitude: effectiveInitialCenter[0],
+          latitude: effectiveInitialCenter[1],
+          zoom: effectiveInitialZoom,
         }}
         style={{ width: '100%', height: '100%' }}
         mapStyle={MAP_STYLES[theme]}
