@@ -33,9 +33,11 @@ import {
   getGeometryCenter,
   getMarkerColor,
   createMarkerIcon,
+  createStatusMarkerIcon,
   createPulsingPolyline,
   getTypeColor,
   getPrivateTypeColor,
+  geoJsonToLatLng,
 } from './google-map.utils';
 import { GoogleMapInfoWindow } from './GoogleMapInfoWindow';
 import { GoogleMapLegend } from './GoogleMapLegend';
@@ -75,6 +77,7 @@ export function GoogleConstructionMap({
   const dataLayerRef = useRef<google.maps.Data | null>(null);
   const routePolylineRef = useRef<google.maps.Polyline | null>(null);
   const alertMarkersRef = useRef<google.maps.Marker[]>([]);
+  const pointMarkersRef = useRef<Array<{ id: string; marker: google.maps.Marker }>>([]);
   const animatedPolylinesRef = useRef<Array<{ id: string; cleanup: () => void }>>([]);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const viewportTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -173,6 +176,10 @@ export function GoogleConstructionMap({
     animatedPolylinesRef.current.forEach(({ cleanup }) => cleanup());
     animatedPolylinesRef.current = [];
 
+    // Cleanup existing point markers
+    pointMarkersRef.current.forEach(({ marker }) => marker.setMap(null));
+    pointMarkersRef.current = [];
+
     // Create new data layer
     const dataLayer = new google.maps.Data({ map });
     dataLayerRef.current = dataLayer;
@@ -180,10 +187,10 @@ export function GoogleConstructionMap({
     // Add GeoJSON features
     dataLayer.addGeoJson(geojsonData);
 
-    // Track which feature IDs have animated polylines
-    const animatedFeatureIds = new Set<string>();
+    // Track which feature IDs have custom rendering (animated polylines or point markers)
+    const customRenderedIds = new Set<string>();
 
-    // Create animated polylines for in-progress LineString features
+    // Create markers for Point features and animated polylines for in-progress LineStrings
     geojsonData.features.forEach((feature) => {
       if (!feature.geometry || !feature.properties) return;
 
@@ -193,25 +200,92 @@ export function GoogleConstructionMap({
       const privateType = feature.properties.privateType as string;
       const id = feature.properties.id as string;
 
-      // Only animate in-progress LineStrings that pass filters
-      if (
-        feature.geometry.type === 'LineString' &&
-        status === 'in-progress' &&
+      // Check if feature passes filters
+      const passesFilters =
         visibleTypes.has(type) &&
         visibleStatuses.has(status) &&
-        visibleCategories.has(category)
-      ) {
-        // Get color based on category and type
-        const color = category === 'private' && privateType
-          ? getPrivateTypeColor(privateType)
-          : getTypeColor(type);
+        visibleCategories.has(category);
 
-        // Convert coordinates to Google Maps path
+      if (!passesFilters) return;
+
+      // Get color based on category and type
+      const color = category === 'private' && privateType
+        ? getPrivateTypeColor(privateType)
+        : getTypeColor(type);
+
+      // Handle Point features - create separate markers with SVG icons
+      if (feature.geometry.type === 'Point') {
+        const position = geoJsonToLatLng(feature.geometry.coordinates as [number, number]);
+        const icon = createStatusMarkerIcon(color, status, type);
+
+        const marker = new google.maps.Marker({
+          position,
+          map,
+          icon,
+          title: feature.properties.title as string,
+          zIndex: status === 'in-progress' ? 100 : status === 'completed' ? 50 : 75,
+        });
+
+        // Add click listener to marker
+        marker.addListener('click', () => {
+          const props = {
+            id: feature.properties!.id as string,
+            slug: feature.properties!.slug as string,
+            title: feature.properties!.title as string,
+            excerpt: feature.properties!.excerpt as string,
+            constructionStatus: feature.properties!.constructionStatus as string,
+            progress: feature.properties!.progress as number,
+            constructionType: feature.properties!.constructionType as string,
+            constructionCategory: feature.properties!.constructionCategory as 'public' | 'private',
+            privateType: feature.properties!.privateType as string,
+            organizationName: feature.properties!.organizationName as string,
+            startDate: feature.properties!.startDate as string,
+            expectedEndDate: feature.properties!.expectedEndDate as string,
+          };
+          setActiveConstruction(props);
+          setPopupPosition(position);
+          onSelectConstruction?.(props.id);
+        });
+
+        // Add mouseover listener
+        marker.addListener('mouseover', () => {
+          if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+            hideTimeoutRef.current = null;
+          }
+          const props = {
+            id: feature.properties!.id as string,
+            slug: feature.properties!.slug as string,
+            title: feature.properties!.title as string,
+            excerpt: feature.properties!.excerpt as string,
+            constructionStatus: feature.properties!.constructionStatus as string,
+            progress: feature.properties!.progress as number,
+            constructionType: feature.properties!.constructionType as string,
+            constructionCategory: feature.properties!.constructionCategory as 'public' | 'private',
+            privateType: feature.properties!.privateType as string,
+            organizationName: feature.properties!.organizationName as string,
+            startDate: feature.properties!.startDate as string,
+            expectedEndDate: feature.properties!.expectedEndDate as string,
+          };
+          setActiveConstruction(props);
+          setPopupPosition(position);
+        });
+
+        // Add mouseout listener
+        marker.addListener('mouseout', () => {
+          scheduleHidePopup();
+        });
+
+        pointMarkersRef.current.push({ id, marker });
+        customRenderedIds.add(id);
+      }
+
+      // Handle in-progress LineStrings - create animated polylines
+      if (feature.geometry.type === 'LineString' && status === 'in-progress') {
         const path = geoJsonPathToLatLngPath(
           feature.geometry.coordinates as [number, number][]
         );
 
-        // Create animated polyline
         const { cleanup } = createPulsingPolyline(map, path, color, {
           strokeWeight: 5,
           zIndex: 100,
@@ -219,7 +293,7 @@ export function GoogleConstructionMap({
         });
 
         animatedPolylinesRef.current.push({ id, cleanup });
-        animatedFeatureIds.add(id);
+        customRenderedIds.add(id);
       }
     });
 
@@ -239,8 +313,8 @@ export function GoogleConstructionMap({
         return { visible: false };
       }
 
-      // Hide LineStrings that have animated polylines (to avoid double rendering)
-      if (animatedFeatureIds.has(id)) {
+      // Hide features that have custom rendering (point markers or animated polylines)
+      if (customRenderedIds.has(id)) {
         return { visible: false };
       }
 
@@ -314,11 +388,14 @@ export function GoogleConstructionMap({
 
     return () => {
       dataLayer.setMap(null);
+      // Cleanup point markers when effect re-runs
+      pointMarkersRef.current.forEach(({ marker }) => marker.setMap(null));
+      pointMarkersRef.current = [];
       // Cleanup animated polylines when effect re-runs
       animatedPolylinesRef.current.forEach(({ cleanup }) => cleanup());
       animatedPolylinesRef.current = [];
     };
-  }, [geojsonData, visibleTypes, visibleStatuses, visibleCategories, onSelectConstruction]);
+  }, [geojsonData, visibleTypes, visibleStatuses, visibleCategories, onSelectConstruction, scheduleHidePopup]);
 
   // Add route polyline
   useEffect(() => {
