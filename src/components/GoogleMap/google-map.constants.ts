@@ -39,8 +39,15 @@ export const MAP_CONTAINER_STYLE = {
   height: '100%',
 };
 
+// Google Maps style type (matches google.maps.MapTypeStyle structure)
+interface MapTypeStyle {
+  elementType?: string;
+  featureType?: string;
+  stylers: Array<{ [key: string]: string | number }>;
+}
+
 // Google Maps dark mode style
-export const GOOGLE_MAP_DARK_STYLE: google.maps.MapTypeStyle[] = [
+export const GOOGLE_MAP_DARK_STYLE: MapTypeStyle[] = [
   { elementType: 'geometry', stylers: [{ color: '#212121' }] },
   { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
   { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
@@ -132,7 +139,7 @@ export const GOOGLE_MAP_DARK_STYLE: google.maps.MapTypeStyle[] = [
 ];
 
 // Google Maps light mode style (default/empty)
-export const GOOGLE_MAP_LIGHT_STYLE: google.maps.MapTypeStyle[] = [];
+export const GOOGLE_MAP_LIGHT_STYLE: MapTypeStyle[] = [];
 
 // Status colors for construction markers
 export const STATUS_COLORS: Record<string, string> = {
@@ -225,8 +232,8 @@ export const STATUS_LABELS_SHORT: Record<string, string> = {
   'cancelled': 'Hủy',
 };
 
-// Map options
-export const DEFAULT_MAP_OPTIONS: google.maps.MapOptions = {
+// Map options (typed as any to avoid google.maps reference at module load)
+export const DEFAULT_MAP_OPTIONS = {
   disableDefaultUI: false,
   zoomControl: true,
   mapTypeControl: false,
@@ -234,19 +241,16 @@ export const DEFAULT_MAP_OPTIONS: google.maps.MapOptions = {
   fullscreenControl: false,
   gestureHandling: 'greedy',
   clickableIcons: false,
-};
+} as const;
 
-// InfoWindow offset
-export const INFO_WINDOW_OPTIONS: google.maps.InfoWindowOptions = {
-  pixelOffset: new google.maps.Size(0, -30),
-  disableAutoPan: false,
-};
+// InfoWindow pixel offset values (used to create google.maps.Size at runtime)
+export const INFO_WINDOW_PIXEL_OFFSET = { x: 0, y: -30 };
 
 // Marker clusterer options
 export const CLUSTER_OPTIONS = {
   maxZoom: 14,
   gridSize: 50,
-};
+} as const;
 
 // Zoom level thresholds
 export const ZOOM_LEVELS = {
