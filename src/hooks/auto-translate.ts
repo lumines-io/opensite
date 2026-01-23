@@ -148,7 +148,7 @@ async function processTranslationQueue(payload: PayloadRequest['payload']): Prom
     let docTitle: string | undefined;
     try {
       const doc = await payload.findByID({
-        collection: job.collection as 'constructions' | 'suggestions' | 'districts',
+        collection: job.collection as 'constructions' | 'suggestions',
         id: job.docId,
       });
       docTitle = (doc as { title?: string; name?: string })?.title || (doc as { name?: string })?.name;
@@ -200,7 +200,7 @@ async function processTranslationQueue(payload: PayloadRequest['payload']): Prom
           // Update the document with the translated value
           try {
             await payload.update({
-              collection: job.collection as 'constructions' | 'suggestions' | 'districts',
+              collection: job.collection as 'constructions' | 'suggestions',
               id: job.docId,
               locale: targetLocale,
               data: {

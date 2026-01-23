@@ -14,9 +14,6 @@ interface Construction {
     id: string;
     name: string;
   };
-  district?: {
-    name: string;
-  };
   review?: {
     submittedAt?: string;
     submittedBy?: {
@@ -267,7 +264,6 @@ export const PrivateConstructionsReviewView: React.FC = () => {
                   <th>Project</th>
                   <th>Type</th>
                   <th>Organization</th>
-                  <th>District</th>
                   <th>Submitted</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -286,7 +282,6 @@ export const PrivateConstructionsReviewView: React.FC = () => {
                       {privateTypeLabels[construction.privateType || ''] || construction.privateType || 'N/A'}
                     </td>
                     <td>{construction.organization?.name || 'N/A'}</td>
-                    <td>{construction.district?.name || 'N/A'}</td>
                     <td>
                       {construction.review?.submittedAt
                         ? new Date(construction.review.submittedAt).toLocaleDateString()

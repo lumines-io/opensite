@@ -39,18 +39,10 @@ export interface SearchFilters {
   query: string;
   type: string;
   status: string;
-  district: string;
   startDateFrom: string;
   startDateTo: string;
   endDateFrom: string;
   endDateTo: string;
-}
-
-export interface District {
-  id: number;
-  name: string;
-  nameEn?: string;
-  code?: string;
 }
 
 export interface SearchResultItem {
@@ -60,7 +52,6 @@ export interface SearchResultItem {
   constructionType: string;
   constructionStatus: string;
   progress: number;
-  district: District | null;
   startDate: string | null;
   expectedEndDate: string | null;
   center: [number, number] | null;

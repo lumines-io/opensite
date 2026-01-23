@@ -69,7 +69,6 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('q') || '';
     const type = searchParams.get('type') || '';
     const status = searchParams.get('status') || '';
-    const district = searchParams.get('district') || '';
     const startDateFrom = searchParams.get('startDateFrom') || '';
     const startDateTo = searchParams.get('startDateTo') || '';
     const endDateFrom = searchParams.get('endDateFrom') || '';
@@ -92,11 +91,6 @@ export async function GET(request: NextRequest) {
     // Filter by construction status
     if (status) {
       where.constructionStatus = { equals: status };
-    }
-
-    // Filter by district (relationship)
-    if (district) {
-      where.district = { equals: parseInt(district, 10) };
     }
 
     // Filter by start date range
@@ -127,7 +121,7 @@ export async function GET(request: NextRequest) {
       where,
       limit: query ? 1000 : limit, // Fetch more for text search, then filter client-side
       page: query ? 1 : page,
-      depth: 1, // Include district relationship
+      depth: 0,
     });
 
     // Apply full-text search on title and description if query provided
@@ -176,9 +170,6 @@ export async function GET(request: NextRequest) {
         c.centroid as [number, number] | null
       );
 
-      // Get district info
-      const districtData = c.district as { id: number; name: string; nameEn?: string } | null;
-
       return {
         id: c.id,
         title: c.title,
@@ -186,13 +177,6 @@ export async function GET(request: NextRequest) {
         constructionType: c.constructionType,
         constructionStatus: c.constructionStatus,
         progress: c.progress,
-        district: districtData
-          ? {
-              id: districtData.id,
-              name: districtData.name,
-              nameEn: districtData.nameEn,
-            }
-          : null,
         startDate: c.startDate,
         expectedEndDate: c.expectedEndDate,
         center,
@@ -244,7 +228,6 @@ export async function GET(request: NextRequest) {
         query,
         type,
         status,
-        district,
         startDateFrom,
         startDateTo,
         endDateFrom,

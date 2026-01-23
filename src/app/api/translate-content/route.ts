@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate collection
-    const validCollections = ['constructions', 'suggestions', 'districts'];
+    const validCollections = ['constructions', 'suggestions'];
     if (!validCollections.includes(collection)) {
       return NextResponse.json(
         { error: `Invalid collection. Must be one of: ${validCollections.join(', ')}` },
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch the document in the source locale
     const doc = await payload.findByID({
-      collection: collection as 'constructions' | 'suggestions' | 'districts',
+      collection: collection as 'constructions' | 'suggestions',
       id,
       locale: sourceLocale || 'vi',
     });
@@ -100,10 +100,6 @@ export async function POST(request: NextRequest) {
       suggestions: {
         text: ['title', 'locationDescription'],
         richText: ['justification'],
-      },
-      districts: {
-        text: ['name'],
-        richText: [],
       },
     };
 
@@ -144,7 +140,7 @@ export async function POST(request: NextRequest) {
 
           // Update the document with the translation
           await payload.update({
-            collection: collection as 'constructions' | 'suggestions' | 'districts',
+            collection: collection as 'constructions' | 'suggestions',
             id,
             locale: targetLocale,
             data: {
@@ -168,7 +164,7 @@ export async function POST(request: NextRequest) {
 
           // Update the document with the translation
           await payload.update({
-            collection: collection as 'constructions' | 'suggestions' | 'districts',
+            collection: collection as 'constructions' | 'suggestions',
             id,
             locale: targetLocale,
             data: {
@@ -217,7 +213,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const validCollections = ['constructions', 'suggestions', 'districts'];
+  const validCollections = ['constructions', 'suggestions'];
   if (!validCollections.includes(collection)) {
     return NextResponse.json(
       { error: `Invalid collection. Must be one of: ${validCollections.join(', ')}` },
@@ -233,7 +229,7 @@ export async function GET(request: NextRequest) {
 
     for (const locale of locales) {
       const doc = await payload.findByID({
-        collection: collection as 'constructions' | 'suggestions' | 'districts',
+        collection: collection as 'constructions' | 'suggestions',
         id,
         locale,
       });
@@ -243,7 +239,6 @@ export async function GET(request: NextRequest) {
         const translatableFields: Record<string, string[]> = {
           constructions: ['title', 'description'],
           suggestions: ['title', 'locationDescription', 'justification'],
-          districts: ['name'],
         };
 
         const fields = translatableFields[collection];

@@ -34,10 +34,6 @@ interface Construction {
   announcedDate?: string;
   geometry?: Record<string, unknown>;
   centroid?: [number, number];
-  district?: {
-    id: string;
-    name: string;
-  };
   organization?: {
     id: string;
     name: string;
@@ -327,10 +323,6 @@ function ProjectDetailContent() {
                   </div>
                   <span className="text-sm font-medium">{construction.progress}%</span>
                 </div>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">District</p>
-                <p className="font-medium">{construction.district?.name || 'Not specified'}</p>
               </div>
             </div>
           </section>

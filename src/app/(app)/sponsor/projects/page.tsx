@@ -26,9 +26,6 @@ interface Construction {
   progress: number;
   createdAt: string;
   updatedAt: string;
-  district?: {
-    name: string;
-  };
   organization?: {
     id: string;
     name: string;
@@ -334,11 +331,6 @@ function SponsorProjectsContent() {
                         </span>
                       )}
                     </div>
-                    {construction.district && (
-                      <p className="text-sm text-muted-foreground">
-                        {construction.district.name}
-                      </p>
-                    )}
                     <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
                       <span>
                         Updated:{' '}

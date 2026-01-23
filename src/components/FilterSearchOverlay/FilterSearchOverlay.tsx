@@ -9,7 +9,6 @@ import type {
   SearchFilters,
   SearchResultItem,
   SearchResponse,
-  District,
   FilterOption,
 } from '@/types/construction';
 
@@ -44,7 +43,6 @@ const DEFAULT_FILTERS: SearchFilters = {
   query: '',
   type: '',
   status: '',
-  district: '',
   startDateFrom: '',
   startDateTo: '',
   endDateFrom: '',
@@ -58,7 +56,6 @@ export function FilterSearchOverlay({
 }: FilterSearchOverlayProps) {
   const [filters, setFilters] = useState<SearchFilters>(DEFAULT_FILTERS);
   const [results, setResults] = useState<SearchResultItem[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [pagination, setPagination] = useState({
@@ -72,22 +69,6 @@ export function FilterSearchOverlay({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const { shouldRender, isVisible } = useAnimatedVisibility(isOpen, 300);
-
-  // Fetch districts on mount
-  useEffect(() => {
-    const fetchDistricts = async () => {
-      try {
-        const response = await fetch('/api/districts');
-        if (response.ok) {
-          const data = await response.json();
-          setDistricts(data.districts || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch districts:', error);
-      }
-    };
-    fetchDistricts();
-  }, []);
 
   // Focus input when overlay opens
   useEffect(() => {
@@ -104,7 +85,6 @@ export function FilterSearchOverlay({
       if (searchFilters.query) params.set('q', searchFilters.query);
       if (searchFilters.type) params.set('type', searchFilters.type);
       if (searchFilters.status) params.set('status', searchFilters.status);
-      if (searchFilters.district) params.set('district', searchFilters.district);
       if (searchFilters.startDateFrom) params.set('startDateFrom', searchFilters.startDateFrom);
       if (searchFilters.startDateTo) params.set('startDateTo', searchFilters.startDateTo);
       if (searchFilters.endDateFrom) params.set('endDateFrom', searchFilters.endDateFrom);
@@ -175,7 +155,6 @@ export function FilterSearchOverlay({
     return (
       filters.type !== '' ||
       filters.status !== '' ||
-      filters.district !== '' ||
       filters.startDateFrom !== '' ||
       filters.startDateTo !== '' ||
       filters.endDateFrom !== '' ||
@@ -188,7 +167,6 @@ export function FilterSearchOverlay({
     let count = 0;
     if (filters.type) count++;
     if (filters.status) count++;
-    if (filters.district) count++;
     if (filters.startDateFrom || filters.startDateTo) count++;
     if (filters.endDateFrom || filters.endDateTo) count++;
     return count;
@@ -396,23 +374,6 @@ export function FilterSearchOverlay({
               </select>
             </div>
 
-            {/* District filter */}
-            <div>
-              <label className="block text-label-md text-foreground mb-1">Quận/Huyện</label>
-              <select
-                value={filters.district}
-                onChange={(e) => handleFilterChange('district', e.target.value)}
-                className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-              >
-                <option value="">Tất cả quận/huyện</option>
-                {districts.map((district) => (
-                  <option key={district.id} value={district.id}>
-                    {district.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {/* Date range filters */}
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -534,11 +495,6 @@ export function FilterSearchOverlay({
                             {getTypeLabel(construction.constructionType)}
                           </span>
                         </div>
-                        {construction.district && (
-                          <div className="text-caption text-muted-foreground mt-1">
-                            {construction.district.name}
-                          </div>
-                        )}
                         {(construction.startDate || construction.expectedEndDate) && (
                           <div className="text-caption text-muted-foreground mt-1">
                             {formatDate(construction.startDate) && (

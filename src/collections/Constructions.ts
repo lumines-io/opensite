@@ -21,7 +21,7 @@ export const Constructions: CollectionConfig = {
   slug: 'constructions',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'constructionType', 'status', 'progress', 'district', 'updatedAt'],
+    defaultColumns: ['title', 'constructionType', 'status', 'progress', 'updatedAt'],
     group: 'Content',
   },
   access: {
@@ -384,16 +384,6 @@ export const Constructions: CollectionConfig = {
           label: 'Funding Source',
         },
       ],
-    },
-
-    // Relations
-    {
-      name: 'district',
-      type: 'relationship',
-      relationTo: 'districts',
-      admin: {
-        position: 'sidebar',
-      },
     },
 
     // Metro stations (only for metro type)

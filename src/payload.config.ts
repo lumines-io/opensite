@@ -17,7 +17,6 @@ assertValidEnvironment();
 // Collections
 import { Users } from './collections/Users';
 import { Organizations } from './collections/Organizations';
-import { Districts } from './collections/Districts';
 import { Constructions } from './collections/Constructions';
 import { ConstructionChangelog } from './collections/ConstructionChangelog';
 import { Suggestions } from './collections/Suggestions';
@@ -163,7 +162,6 @@ export default buildConfig({
   collections: [
     Users,
     Organizations,
-    Districts,
     Constructions,
     ConstructionChangelog,
     Suggestions,

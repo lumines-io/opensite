@@ -14,9 +14,6 @@ interface Construction {
   id: string;
   constructionStatus: string;
   constructionType?: string;
-  district?: {
-    name: string;
-  };
   createdAt: string;
   completedAt?: string;
 }
@@ -143,18 +140,6 @@ export const AnalyticsView: React.FC = () => {
     const total = approved + rejected;
     const rate = total > 0 ? (approved / total) * 100 : 0;
 
-    // Top districts
-    const districtCounts = allConstructions.reduce<Record<string, number>>((acc, c) => {
-      const districtName = c.district?.name || 'Unknown';
-      acc[districtName] = (acc[districtName] || 0) + 1;
-      return acc;
-    }, {});
-
-    const topDistricts = Object.entries(districtCounts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
-      .map(([name, count]) => ({ name, count }));
-
     // Construction types
     const typeCounts = allConstructions.reduce<Record<string, number>>((acc, c) => {
       const type = c.constructionType || 'unknown';
@@ -175,7 +160,6 @@ export const AnalyticsView: React.FC = () => {
     return {
       submissionTrend,
       approvalRate: { approved, rejected, pending, rate },
-      topDistricts,
       constructionTypes,
       monthlyStats: { newConstructions, completedConstructions, newSuggestions, newUsers },
     };
@@ -194,7 +178,6 @@ export const AnalyticsView: React.FC = () => {
   }
 
   const maxSubmission = Math.max(...analytics.submissionTrend.map(d => d.count), 1);
-  const maxDistrict = Math.max(...analytics.topDistricts.map(d => d.count), 1);
 
   return (
     <div className="custom-view">
@@ -291,23 +274,6 @@ export const AnalyticsView: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="custom-view__card">
-          <h3>Top Districts</h3>
-          {analytics.topDistricts.length > 0 ? (
-            <SimpleBarChart
-              data={analytics.topDistricts.map(d => ({
-                label: d.name,
-                value: d.count,
-              }))}
-              maxValue={maxDistrict}
-            />
-          ) : (
-            <p style={{ color: 'var(--theme-elevation-300)', fontSize: '0.875rem' }}>
-              No district data available
-            </p>
-          )}
         </div>
 
         <div className="custom-view__card">

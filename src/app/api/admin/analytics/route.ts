@@ -78,7 +78,6 @@ export async function GET(request: Request) {
     // Calculate constructions by type
     const constructionsByType: Record<string, number> = {};
     const constructionsByStatus: Record<string, number> = {};
-    const areaCount: Record<string, { count: number; name: string }> = {};
 
     constructions.docs.forEach((c) => {
       // By type
@@ -88,16 +87,6 @@ export async function GET(request: Request) {
       // By status
       const status = (c.constructionStatus as string) || 'unknown';
       constructionsByStatus[status] = (constructionsByStatus[status] || 0) + 1;
-
-      // By district
-      if (c.district && typeof c.district === 'object') {
-        const district = c.district as { id: string; name: string; nameEn?: string };
-        const districtId = district.id || 'unknown';
-        if (!areaCount[districtId]) {
-          areaCount[districtId] = { count: 0, name: district.name || district.nameEn || districtId };
-        }
-        areaCount[districtId].count += 1;
-      }
     });
 
     // Fetch source breakdown
@@ -153,16 +142,6 @@ export async function GET(request: Request) {
       });
     }
 
-    // Format popular areas
-    const popularAreas = Object.entries(areaCount)
-      .map(([district, data]) => ({
-        district,
-        districtName: data.name,
-        count: data.count,
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
     // Calculate approval rate
     const totalDecided = approvedSuggestions.totalDocs + rejectedSuggestions.totalDocs;
     const approvalRate =
@@ -177,7 +156,6 @@ export async function GET(request: Request) {
         pending: pendingSuggestions.totalDocs,
         rate: approvalRate,
       },
-      popularAreas,
       constructionsByType: Object.entries(constructionsByType).map(([type, count]) => ({
         type,
         count,
