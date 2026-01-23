@@ -46,8 +46,214 @@ interface MapTypeStyle {
   stylers: Array<{ [key: string]: string | number }>;
 }
 
+/**
+ * Google Maps Feature Types Reference
+ * Use these constants when creating custom map styles
+ *
+ * @see https://developers.google.com/maps/documentation/javascript/style-reference
+ */
+export const MAP_FEATURE_TYPES = {
+  // All features
+  ALL: 'all',
+
+  // Administrative areas
+  ADMINISTRATIVE: 'administrative',
+  ADMINISTRATIVE_COUNTRY: 'administrative.country',
+  ADMINISTRATIVE_LAND_PARCEL: 'administrative.land_parcel',
+  ADMINISTRATIVE_LOCALITY: 'administrative.locality', // Cities
+  ADMINISTRATIVE_NEIGHBORHOOD: 'administrative.neighborhood',
+  ADMINISTRATIVE_PROVINCE: 'administrative.province', // States/provinces
+
+  // Landscape features
+  LANDSCAPE: 'landscape',
+  LANDSCAPE_MAN_MADE: 'landscape.man_made', // Buildings, structures
+  LANDSCAPE_NATURAL: 'landscape.natural', // Natural features
+  LANDSCAPE_NATURAL_LANDCOVER: 'landscape.natural.landcover', // Land cover
+  LANDSCAPE_NATURAL_TERRAIN: 'landscape.natural.terrain', // Terrain
+
+  // Points of Interest (POI)
+  POI: 'poi',
+  POI_ATTRACTION: 'poi.attraction', // Tourist attractions
+  POI_BUSINESS: 'poi.business', // Businesses (restaurants, shops, etc.)
+  POI_GOVERNMENT: 'poi.government', // Government buildings
+  POI_MEDICAL: 'poi.medical', // Hospitals, clinics
+  POI_PARK: 'poi.park', // Parks and recreation
+  POI_PLACE_OF_WORSHIP: 'poi.place_of_worship', // Churches, temples, mosques
+  POI_SCHOOL: 'poi.school', // Schools and universities
+  POI_SPORTS_COMPLEX: 'poi.sports_complex', // Sports facilities
+
+  // Roads
+  ROAD: 'road',
+  ROAD_ARTERIAL: 'road.arterial', // Arterial roads
+  ROAD_HIGHWAY: 'road.highway', // Highways
+  ROAD_HIGHWAY_CONTROLLED_ACCESS: 'road.highway.controlled_access', // Freeways
+  ROAD_LOCAL: 'road.local', // Local roads
+
+  // Transit
+  TRANSIT: 'transit',
+  TRANSIT_LINE: 'transit.line', // Transit lines (bus, rail)
+  TRANSIT_STATION: 'transit.station', // Transit stations
+  TRANSIT_STATION_AIRPORT: 'transit.station.airport', // Airports
+  TRANSIT_STATION_BUS: 'transit.station.bus', // Bus stations
+  TRANSIT_STATION_RAIL: 'transit.station.rail', // Rail stations
+
+  // Water
+  WATER: 'water',
+} as const;
+
+/**
+ * Google Maps Element Types Reference
+ * Use these constants when targeting specific parts of features
+ */
+export const MAP_ELEMENT_TYPES = {
+  // All elements
+  ALL: 'all',
+
+  // Geometry elements
+  GEOMETRY: 'geometry',
+  GEOMETRY_FILL: 'geometry.fill', // Fill color
+  GEOMETRY_STROKE: 'geometry.stroke', // Stroke/outline color
+
+  // Label elements
+  LABELS: 'labels',
+  LABELS_ICON: 'labels.icon', // Icons/markers
+  LABELS_TEXT: 'labels.text', // All text
+  LABELS_TEXT_FILL: 'labels.text.fill', // Text fill color
+  LABELS_TEXT_STROKE: 'labels.text.stroke', // Text outline/halo
+} as const;
+
+/**
+ * Google Maps Styler Properties Reference
+ * Use these when creating stylers for map styles
+ */
+export const MAP_STYLER_PROPERTIES = {
+  // Visibility
+  VISIBILITY: 'visibility', // 'on', 'off', 'simplified'
+
+  // Colors
+  COLOR: 'color', // Hex color (e.g., '#FF0000')
+  HUE: 'hue', // Hex color for hue shift
+
+  // Adjustments
+  LIGHTNESS: 'lightness', // -100 to 100
+  SATURATION: 'saturation', // -100 to 100
+  GAMMA: 'gamma', // 0.01 to 10.0
+  WEIGHT: 'weight', // Stroke weight in pixels
+
+  // Inversion
+  INVERT_LIGHTNESS: 'invert_lightness', // true/false
+} as const;
+
+/**
+ * Common visibility values
+ */
+export const MAP_VISIBILITY = {
+  ON: 'on',
+  OFF: 'off',
+  SIMPLIFIED: 'simplified',
+} as const;
+
+// Type exports for TypeScript
+export type MapFeatureType = typeof MAP_FEATURE_TYPES[keyof typeof MAP_FEATURE_TYPES];
+export type MapElementType = typeof MAP_ELEMENT_TYPES[keyof typeof MAP_ELEMENT_TYPES];
+export type MapStylerProperty = typeof MAP_STYLER_PROPERTIES[keyof typeof MAP_STYLER_PROPERTIES];
+export type MapVisibility = typeof MAP_VISIBILITY[keyof typeof MAP_VISIBILITY];
+
+/**
+ * Helper function to create a map style entry
+ *
+ * Usage:
+ *   mapStyle(F.POI_BUSINESS, E.LABELS_ICON, { visibility: 'off' })
+ *   mapStyle(F.ROAD_HIGHWAY, E.GEOMETRY, { color: '#ff0000' })
+ */
+export function mapStyle(
+  featureType: MapFeatureType,
+  elementType: MapElementType | null,
+  stylers: Record<string, string | number>
+): MapTypeStyle {
+  const style: MapTypeStyle = {
+    featureType,
+    stylers: [stylers],
+  };
+  if (elementType) {
+    style.elementType = elementType;
+  }
+  return style;
+}
+
+// Shorthand aliases for cleaner syntax
+export const F = MAP_FEATURE_TYPES;
+export const E = MAP_ELEMENT_TYPES;
+
+// Common map styles for feature visibility (shared between light and dark)
+// Reference: MAP_FEATURE_TYPES for all available feature types
+export const GOOGLE_MAP_COMMON_STYLE: MapTypeStyle[] = [
+  // ===================
+  // ADMINISTRATIVE
+  // ===================
+  // administrative - shown (country borders, region names)
+  // administrative.country - shown
+  // administrative.land_parcel - hidden (too detailed)
+  { featureType: F.ADMINISTRATIVE_LAND_PARCEL, elementType: E.ALL, stylers: [{ visibility: 'off' }] },
+  // administrative.locality - shown (city names)
+  // administrative.neighborhood - shown
+  // administrative.province - shown
+
+  // ===================
+  // LANDSCAPE
+  // ===================
+  // landscape - shown (default styling)
+  // landscape.man_made - shown
+  // landscape.natural - shown
+  // landscape.natural.landcover - shown
+  // landscape.natural.terrain - shown
+
+  // ===================
+  // POI (Points of Interest)
+  // ===================
+  // Hide all POI by default
+  { featureType: F.POI, elementType: E.LABELS_ICON, stylers: [{ visibility: 'off' }] },
+  { featureType: F.POI, elementType: E.LABELS_TEXT, stylers: [{ visibility: 'off' }] },
+  // poi.attraction - hidden (covered by POI rule above)
+  // poi.business - hidden (covered by POI rule above)
+  // poi.government - show (important for context)
+  { featureType: F.POI_GOVERNMENT, elementType: E.LABELS_ICON, stylers: [{ visibility: 'on' }] },
+  { featureType: F.POI_GOVERNMENT, elementType: E.LABELS_TEXT, stylers: [{ visibility: 'on' }] },
+  // poi.medical - hidden (covered by POI rule above)
+  // poi.park - hidden labels but geometry shown (covered by POI rule above)
+  // poi.place_of_worship - hidden (covered by POI rule above)
+  // poi.school - hidden (covered by POI rule above)
+  // poi.sports_complex - hidden (covered by POI rule above)
+
+  // ===================
+  // ROAD
+  // ===================
+  // road - shown (essential for navigation)
+  // road.arterial - shown
+  // road.highway - shown
+  // road.highway.controlled_access - shown
+  // road.local - shown
+
+  // ===================
+  // TRANSIT
+  // ===================
+  // Hide transit icons (we show our own metro/station data)
+  { featureType: F.TRANSIT, elementType: E.LABELS_ICON, stylers: [{ visibility: 'off' }] },
+  // transit.line - geometry shown, icons hidden
+  // transit.station - hidden icons (we render our own)
+  // transit.station.airport - hidden icons
+  // transit.station.bus - hidden icons
+  // transit.station.rail - hidden icons
+
+  // ===================
+  // WATER
+  // ===================
+  // water - shown (essential for geography)
+];
+
 // Google Maps dark mode style
 export const GOOGLE_MAP_DARK_STYLE: MapTypeStyle[] = [
+  ...GOOGLE_MAP_COMMON_STYLE,
   { elementType: 'geometry', stylers: [{ color: '#212121' }] },
   { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
@@ -70,28 +276,7 @@ export const GOOGLE_MAP_DARK_STYLE: MapTypeStyle[] = [
     elementType: 'labels.text.fill',
     stylers: [{ color: '#bdbdbd' }],
   },
-  // Hide all POI icons and labels
-  {
-    featureType: 'poi',
-    elementType: 'labels.icon',
-    stylers: [{ visibility: 'off' }],
-  },
-  {
-    featureType: 'poi',
-    elementType: 'labels.text',
-    stylers: [{ visibility: 'off' }],
-  },
-  // But show government POIs
-  {
-    featureType: 'poi.government',
-    elementType: 'labels.icon',
-    stylers: [{ visibility: 'on' }],
-  },
-  {
-    featureType: 'poi.government',
-    elementType: 'labels.text',
-    stylers: [{ visibility: 'on' }],
-  },
+  // Dark mode specific: government label color
   {
     featureType: 'poi.government',
     elementType: 'labels.text.fill',
@@ -102,12 +287,6 @@ export const GOOGLE_MAP_DARK_STYLE: MapTypeStyle[] = [
     featureType: 'poi.park',
     elementType: 'geometry',
     stylers: [{ color: '#181818' }],
-  },
-  // Hide transit icons (we show our own metro/station data)
-  {
-    featureType: 'transit',
-    elementType: 'labels.icon',
-    stylers: [{ visibility: 'off' }],
   },
   {
     featureType: 'road',
@@ -156,17 +335,9 @@ export const GOOGLE_MAP_DARK_STYLE: MapTypeStyle[] = [
   },
 ];
 
-// Google Maps light mode style - hide POIs except government
+// Google Maps light mode style
 export const GOOGLE_MAP_LIGHT_STYLE: MapTypeStyle[] = [
-  // Hide all POI icons
-  { featureType: 'poi', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-  // Hide all POI labels
-  { featureType: 'poi', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
-  // But show government POIs
-  { featureType: 'poi.government', elementType: 'labels.icon', stylers: [{ visibility: 'on' }] },
-  { featureType: 'poi.government', elementType: 'labels.text', stylers: [{ visibility: 'on' }] },
-  // Hide transit labels (we show our own metro/station data)
-  { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+  ...GOOGLE_MAP_COMMON_STYLE,
 ];
 
 // Status colors for construction markers
