@@ -163,9 +163,9 @@ interface DevelopmentData {
   slug: string;
   title: string;
   organizationSlug: string;
-  developmentType: 'residential' | 'commercial' | 'office' | 'mixed_use' | 'industrial' | 'hospitality' | 'retail' | 'healthcare' | 'educational' | 'other';
+  developmentType: 'apartment_complex' | 'condominium' | 'villa_project' | 'townhouse_project' | 'resort' | 'hotel' | 'serviced_apartment' | 'commercial_center' | 'shopping_mall' | 'office_building' | 'industrial_park' | 'mixed_use' | 'township' | 'healthcare' | 'educational' | 'other';
   approvalStatus: 'draft' | 'internal_review' | 'submitted' | 'under_review' | 'changes_requested' | 'approved' | 'rejected' | 'published';
-  developmentStatus: 'announced' | 'planning' | 'in-progress' | 'paused' | 'completed';
+  developmentStatus: 'upcoming' | 'pre_launch' | 'selling' | 'limited' | 'sold_out' | 'under_construction' | 'completed';
   progress: number;
   coordinates: [number, number];
   description: string;
@@ -182,9 +182,9 @@ const developments: DevelopmentData[] = [
     slug: 'vinhomes-grand-park-q9',
     title: 'Vinhomes Grand Park - Phase 2',
     organizationSlug: 'vinhomes',
-    developmentType: 'residential',
+    developmentType: 'apartment_complex',
     approvalStatus: 'draft',
-    developmentStatus: 'in-progress',
+    developmentStatus: 'under_construction',
     progress: 45,
     coordinates: [106.8456, 10.8234],
     description: 'Vinhomes Grand Park Phase 2 is a premium residential development in Thu Duc City, featuring modern apartments with world-class amenities.',
@@ -200,7 +200,7 @@ const developments: DevelopmentData[] = [
     organizationSlug: 'vinhomes',
     developmentType: 'mixed_use',
     approvalStatus: 'published',
-    developmentStatus: 'in-progress',
+    developmentStatus: 'under_construction',
     progress: 78,
     coordinates: [106.7219, 10.7945],
     description: 'Iconic 81-story tower in Binh Thanh District, the tallest building in Vietnam featuring luxury residences, Grade A offices, and 6-star hotel.',
@@ -214,9 +214,9 @@ const developments: DevelopmentData[] = [
     slug: 'vinhomes-ocean-park-3',
     title: 'Vinhomes Ocean Park 3 - The Crown',
     organizationSlug: 'vinhomes',
-    developmentType: 'residential',
+    developmentType: 'apartment_complex',
     approvalStatus: 'published',
-    developmentStatus: 'planning',
+    developmentStatus: 'pre_launch',
     progress: 15,
     coordinates: [106.0234, 21.0156],
     description: 'The latest phase of Ocean Park mega township in Hung Yen, featuring coastal living with artificial beach and extensive amenities.',
@@ -230,9 +230,9 @@ const developments: DevelopmentData[] = [
     slug: 'vinhomes-smart-city-phase-2',
     title: 'Vinhomes Smart City - Phase 2',
     organizationSlug: 'vinhomes',
-    developmentType: 'residential',
+    developmentType: 'township',
     approvalStatus: 'submitted',
-    developmentStatus: 'announced',
+    developmentStatus: 'upcoming',
     progress: 0,
     coordinates: [105.7456, 21.0123],
     description: 'Expansion of the smart city concept in Tay Mo - Dai Mo area with AI-integrated smart homes and sustainable urban design.',
@@ -247,9 +247,9 @@ const developments: DevelopmentData[] = [
     slug: 'novaland-aqua-city',
     title: 'Aqua City - Phoenix Island',
     organizationSlug: 'novaland',
-    developmentType: 'residential',
+    developmentType: 'township',
     approvalStatus: 'published',
-    developmentStatus: 'in-progress',
+    developmentStatus: 'under_construction',
     progress: 62,
     coordinates: [106.9123, 10.8567],
     description: 'Eco-friendly township in Dong Nai featuring riverfront villas and modern townhouses with integrated smart city infrastructure.',
@@ -263,7 +263,7 @@ const developments: DevelopmentData[] = [
     slug: 'novaland-the-grand-manhattan',
     title: 'The Grand Manhattan',
     organizationSlug: 'novaland',
-    developmentType: 'commercial',
+    developmentType: 'condominium',
     approvalStatus: 'published',
     developmentStatus: 'completed',
     progress: 100,
@@ -279,9 +279,9 @@ const developments: DevelopmentData[] = [
     slug: 'novaland-novaworld-phan-thiet',
     title: 'NovaWorld Phan Thiet - Festival Town',
     organizationSlug: 'novaland',
-    developmentType: 'hospitality',
+    developmentType: 'resort',
     approvalStatus: 'approved',
-    developmentStatus: 'in-progress',
+    developmentStatus: 'under_construction',
     progress: 55,
     coordinates: [108.2567, 10.8934],
     description: 'Entertainment and resort complex featuring theme parks, golf courses, and beachfront properties in Binh Thuan Province.',
@@ -295,9 +295,9 @@ const developments: DevelopmentData[] = [
     slug: 'novaland-victoria-village',
     title: 'Victoria Village - District 2',
     organizationSlug: 'novaland',
-    developmentType: 'residential',
+    developmentType: 'villa_project',
     approvalStatus: 'under_review',
-    developmentStatus: 'planning',
+    developmentStatus: 'pre_launch',
     progress: 10,
     coordinates: [106.7534, 10.7845],
     description: 'Premium low-rise development in An Phu area featuring garden villas and townhouses with riverside views.',
@@ -1259,34 +1259,46 @@ const seedAll = async () => {
       console.log(`  [EXISTS] ${user.email} (${user.role})`);
       createdUsers.push({ email: user.email, role: user.role, organization: user.organization });
     } else {
-      let organizationId: string | undefined;
+      let organizationId: string | number | undefined;
       if (user.organization && organizationIds[user.organization]) {
         organizationId = organizationIds[user.organization];
       }
 
-      const created = await payload.create({
-        collection: 'users',
-        overrideAccess: true,
-        data: {
-          email: user.email,
-          password: TEST_PASSWORD,
-          name: user.name,
-          role: user.role,
-          bio: user.bio,
-          reputation: user.role === 'admin' ? 1000 : user.role === 'moderator' ? 500 : 0,
-          organization: organizationId,
-        },
-      });
+      const userData: Record<string, unknown> = {
+        email: user.email,
+        password: TEST_PASSWORD,
+        name: user.name,
+        role: user.role,
+        bio: user.bio,
+        reputation: user.role === 'admin' ? 1000 : user.role === 'moderator' ? 500 : 0,
+      };
 
-      await payload.update({
-        collection: 'users',
-        id: created.id,
-        overrideAccess: true,
-        data: { _verified: true },
-      });
+      // Only add organization if it exists - convert to number for Postgres
+      if (organizationId) {
+        const orgIdNum = typeof organizationId === 'string' ? parseInt(organizationId, 10) : organizationId;
+        userData.organization = orgIdNum;
+      }
 
-      console.log(`  [CREATED] ${user.email} (${user.role})`);
-      createdUsers.push({ email: user.email, role: user.role, organization: user.organization });
+      try {
+        const created = await payload.create({
+          collection: 'users',
+          overrideAccess: true,
+          data: userData,
+        });
+
+        await payload.update({
+          collection: 'users',
+          id: created.id,
+          overrideAccess: true,
+          data: { _verified: true },
+        });
+
+        console.log(`  [CREATED] ${user.email} (${user.role})`);
+        createdUsers.push({ email: user.email, role: user.role, organization: user.organization });
+      } catch (error) {
+        console.error(`  [ERROR] Failed to create ${user.email}:`, error);
+        throw error;
+      }
     }
   }
   console.log('');
@@ -1348,13 +1360,16 @@ const seedAll = async () => {
   let developmentsSkipped = 0;
 
   for (const development of developments) {
-    const organizationId = organizationIds[development.organizationSlug];
+    const organizationIdStr = organizationIds[development.organizationSlug];
 
-    if (!organizationId) {
+    if (!organizationIdStr) {
       console.log(`  [SKIPPED] ${development.title} (organization not found)`);
       developmentsSkipped++;
       continue;
     }
+
+    // Convert to number for Postgres
+    const organizationId = parseInt(organizationIdStr, 10);
 
     const existing = await payload.find({
       collection: 'developments',
