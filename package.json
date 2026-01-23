@@ -21,6 +21,8 @@
     "seed": "tsx src/seed-hcmc-constructions.ts",
     "seed:clear": "tsx src/seed-hcmc-constructions.ts --clear",
     "seed:accounts": "tsx src/seed-test-accounts.ts",
+    "seed:developments": "tsx src/seed-developments.ts",
+    "seed:developments:clear": "tsx src/seed-developments.ts --clear",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage"
