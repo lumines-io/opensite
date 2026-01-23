@@ -24,6 +24,11 @@ export function HeaderNav() {
 
   const navItems: NavItem[] = [
     {
+      href: '/saved-places',
+      label: t('savedPlaces'),
+      requiresAuth: true,
+    },
+    {
       href: '/suggestions',
       label: t('suggestions'),
       requiresAuth: true,

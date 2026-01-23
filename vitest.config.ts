@@ -24,6 +24,10 @@ export default defineConfig({
         'src/lib/universal-analytics/*.ts',
         'src/lib/universal-analytics/**/*.ts',
         'src/app/api/analytics/**/*.ts',
+        'src/components/SavedPlaces/**/*.tsx',
+        'src/components/SavedPlaces/**/*.ts',
+        'src/components/Map/useSavedPlacesLayer.ts',
+        'src/app/api/map/saved-places/**/*.ts',
       ],
       exclude: [
         'src/**/*.test.ts',

@@ -26,6 +26,8 @@ import { CronJobLogs } from './collections/CronJobLogs';
 import { AnalyticsEvents } from './collections/AnalyticsEvents';
 import { AnalyticEvent } from './collections/AnalyticEvent';
 import { Logs } from './collections/Logs';
+import { AddressLists } from './collections/AddressLists';
+import { Addresses } from './collections/Addresses';
 
 // Billing Collections
 import { CreditTransactions } from './collections/CreditTransactions';
@@ -176,6 +178,9 @@ export default buildConfig({
     CreditTopupHistory,
     PromotionPackages,
     Promotions,
+    // User Data Collections
+    AddressLists,
+    Addresses,
   ],
   globals: [Settings, AdSettings],
   editor: lexicalEditor(),

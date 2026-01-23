@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload';
 import { logAuthEvent } from '@/lib/logger';
+import { createDefaultAddressList } from '@/lib/user-hooks';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -181,7 +182,7 @@ export const Users: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ doc, operation }) => {
+      async ({ doc, operation, req }) => {
         if (operation === 'create') {
           logAuthEvent({
             event: 'register',
@@ -189,6 +190,9 @@ export const Users: CollectionConfig = {
             email: doc.email,
             success: true,
           });
+
+          // Create a default address list for new users
+          await createDefaultAddressList(req.payload, doc.id);
         }
       },
     ],

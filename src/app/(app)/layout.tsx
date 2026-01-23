@@ -6,6 +6,7 @@ import "../globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PageTransitionProvider, TransitionOverlay } from "@/components/PageTransition";
 import { AuthProvider } from "@/components/Auth";
+import { SavedPlacesProvider } from "@/components/SavedPlaces";
 import { FeatureFlagsProvider } from "@/lib/feature-flags/provider";
 import { getClientFeatureFlags, isFeatureEnabled, FEATURE_FLAGS } from "@/lib/feature-flags";
 import { Analytics } from "@vercel/analytics/next";
@@ -93,13 +94,15 @@ export default async function AppLayout({
           <NextIntlClientProvider messages={messages}>
             <ThemeProvider>
               <AuthProvider>
-                <AdProviderWrapper settings={adSettings}>
-                  <PageTransitionProvider>
-                    {children}
-                    <TransitionOverlay />
-                  </PageTransitionProvider>
-                  <CookieConsent />
-                </AdProviderWrapper>
+                <SavedPlacesProvider>
+                  <AdProviderWrapper settings={adSettings}>
+                    <PageTransitionProvider>
+                      {children}
+                      <TransitionOverlay />
+                    </PageTransitionProvider>
+                    <CookieConsent />
+                  </AdProviderWrapper>
+                </SavedPlacesProvider>
               </AuthProvider>
             </ThemeProvider>
           </NextIntlClientProvider>

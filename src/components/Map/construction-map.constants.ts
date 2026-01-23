@@ -245,3 +245,17 @@ export const PULSE_CONFIG = {
   OPACITY_MIN: 0.4,  // Minimum opacity during pulse
   OPACITY_MAX: 0.8,  // Maximum opacity during pulse
 } as const;
+
+// Saved places layer configuration
+export const SAVED_PLACES_LAYER_IDS = {
+  POINTS: 'saved-places-points',
+  LABELS: 'saved-places-labels',
+} as const;
+
+export const SAVED_PLACES_SOURCE_ID = 'saved-places-source';
+
+// Rose/Pink color to clearly distinguish from construction markers
+export const SAVED_PLACES_MARKER_COLOR = '#E11D48';
+export const SAVED_PLACES_MARKER_SIZE = 12;
+export const SAVED_PLACES_MARKER_STROKE_COLOR = '#FFFFFF';
+export const SAVED_PLACES_MARKER_STROKE_WIDTH = 2;
