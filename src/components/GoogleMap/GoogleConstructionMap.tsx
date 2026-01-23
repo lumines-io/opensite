@@ -303,11 +303,55 @@ export function GoogleConstructionMap({
           feature.geometry.coordinates as [number, number][]
         );
 
-        const { cleanup } = createPulsingPolyline(map, path, color, {
+        const { polylines, cleanup } = createPulsingPolyline(map, path, color, {
           strokeWeight: 5,
           zIndex: 100,
           animationSpeed: 'normal',
         });
+
+        // Add event listeners to the base polyline (first one)
+        const basePolyline = polylines[0];
+        if (basePolyline) {
+          const props = {
+            id: feature.properties!.id as string,
+            slug: feature.properties!.slug as string,
+            title: feature.properties!.title as string,
+            excerpt: feature.properties!.excerpt as string,
+            constructionStatus: feature.properties!.constructionStatus as string,
+            progress: feature.properties!.progress as number,
+            constructionType: feature.properties!.constructionType as string,
+            constructionCategory: feature.properties!.constructionCategory as 'public' | 'private',
+            privateType: feature.properties!.privateType as string,
+            organizationName: feature.properties!.organizationName as string,
+            startDate: feature.properties!.startDate as string,
+            expectedEndDate: feature.properties!.expectedEndDate as string,
+          };
+
+          // Calculate center of the line for popup position
+          const midIdx = Math.floor(path.length / 2);
+          const lineCenter = path[midIdx] || path[0];
+
+          basePolyline.addListener('click', (e: google.maps.PolyMouseEvent) => {
+            setActiveConstruction(props);
+            setPopupPosition(e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : lineCenter);
+            onSelectConstruction?.(props.id);
+          });
+
+          basePolyline.addListener('mouseover', (e: google.maps.PolyMouseEvent) => {
+            map.getDiv().style.cursor = 'pointer';
+            if (hideTimeoutRef.current) {
+              clearTimeout(hideTimeoutRef.current);
+              hideTimeoutRef.current = null;
+            }
+            setActiveConstruction(props);
+            setPopupPosition(e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : lineCenter);
+          });
+
+          basePolyline.addListener('mouseout', () => {
+            map.getDiv().style.cursor = '';
+            scheduleHidePopup();
+          });
+        }
 
         animatedPolylinesRef.current.push({ id, cleanup });
         customRenderedIds.add(id);

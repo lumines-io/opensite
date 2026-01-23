@@ -209,7 +209,7 @@ export function GoogleMapInfoWindow({
       onCloseClick={onClose}
       options={{
         pixelOffset: new google.maps.Size(0, -10),
-        disableAutoPan: false,
+        disableAutoPan: true,
       }}
     >
       <div
