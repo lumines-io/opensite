@@ -1,0 +1,331 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Design System: Color Tokens & Typography
+   ========================================================================== */
+
+:root {
+  /* --------------------------------------------------------------------------
+     Color System - Light Mode
+     -------------------------------------------------------------------------- */
+
+  /* Primary Brand Colors */
+  --primary: #0d9488;
+  --primary-foreground: #ffffff;
+  --primary-hover: #0f766e;
+  --primary-light: #ccfbf1;
+
+  /* Secondary Colors */
+  --secondary: #6366f1;
+  --secondary-foreground: #ffffff;
+  --secondary-hover: #4f46e5;
+  --secondary-light: #e0e7ff;
+
+  /* Accent Colors */
+  --accent: #f59e0b;
+  --accent-foreground: #ffffff;
+  --accent-hover: #d97706;
+  --accent-light: #fef3c7;
+
+  /* Semantic Colors - Surfaces */
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+
+  /* Semantic Colors - UI Elements */
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #0d9488;
+
+  /* Muted & Subtle */
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --subtle: #f9fafb;
+
+  /* Status Colors */
+  --success: #10b981;
+  --success-foreground: #ffffff;
+  --success-light: #d1fae5;
+
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+  --warning-light: #fef3c7;
+
+  --error: #ef4444;
+  --error-foreground: #ffffff;
+  --error-light: #fee2e2;
+
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+  --info-light: #dbeafe;
+
+  /* --------------------------------------------------------------------------
+     Typography System
+     -------------------------------------------------------------------------- */
+
+  /* Font Families */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Font Sizes - Modular Scale (1.25 ratio) */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+  --text-5xl: 3rem;        /* 48px */
+  --text-6xl: 3.75rem;     /* 60px */
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Font Weights */
+  --font-thin: 100;
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+
+  /* --------------------------------------------------------------------------
+     Spacing & Layout
+     -------------------------------------------------------------------------- */
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   Dark Mode Colors
+   -------------------------------------------------------------------------- */
+.dark {
+  /* Primary Brand Colors */
+  --primary: #14b8a6;
+  --primary-foreground: #042f2e;
+  --primary-hover: #2dd4bf;
+  --primary-light: #134e4a;
+
+  /* Secondary Colors */
+  --secondary: #818cf8;
+  --secondary-foreground: #1e1b4b;
+  --secondary-hover: #a5b4fc;
+  --secondary-light: #312e81;
+
+  /* Accent Colors */
+  --accent: #fbbf24;
+  --accent-foreground: #451a03;
+  --accent-hover: #fcd34d;
+  --accent-light: #78350f;
+
+  /* Semantic Colors - Surfaces */
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #171717;
+  --card-foreground: #ededed;
+  --popover: #171717;
+  --popover-foreground: #ededed;
+
+  /* Semantic Colors - UI Elements */
+  --border: #374151;
+  --input: #374151;
+  --ring: #14b8a6;
+
+  /* Muted & Subtle */
+  --muted: #1f2937;
+  --muted-foreground: #9ca3af;
+  --subtle: #111827;
+
+  /* Status Colors */
+  --success: #34d399;
+  --success-foreground: #022c22;
+  --success-light: #064e3b;
+
+  --warning: #fbbf24;
+  --warning-foreground: #451a03;
+  --warning-light: #78350f;
+
+  --error: #f87171;
+  --error-foreground: #450a0a;
+  --error-light: #7f1d1d;
+
+  --info: #60a5fa;
+  --info-foreground: #172554;
+  --info-light: #1e3a8a;
+
+  /* Dark mode shadows - subtle glow effect */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Mapbox popup styles */
+.mapboxgl-popup {
+  max-width: unset !important;
+}
+
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.mapboxgl-popup-close-button {
+  padding: 4px 8px;
+  font-size: 18px;
+  line-height: 1;
+  right: 4px;
+  top: 4px;
+  color: var(--muted-foreground);
+  z-index: 10;
+}
+
+.mapboxgl-popup-close-button:hover {
+  background-color: var(--muted);
+  border-radius: 4px;
+}
+
+/* Dark mode styles for Mapbox popups */
+.dark .mapboxgl-popup-content {
+  background-color: var(--card);
+  color: var(--card-foreground);
+}
+
+.dark .mapboxgl-popup-tip {
+  border-top-color: var(--card);
+}
+
+.dark .mapboxgl-popup-close-button {
+  color: var(--card-foreground);
+}
+
+.dark .mapboxgl-popup-close-button:hover {
+  background-color: var(--muted);
+}
+
+/* Dark mode for map controls */
+.dark .mapboxgl-ctrl-group {
+  background-color: var(--card);
+}
+
+.dark .mapboxgl-ctrl-group button {
+  background-color: var(--card);
+}
+
+.dark .mapboxgl-ctrl-group button + button {
+  border-top-color: var(--border);
+}
+
+.dark .mapboxgl-ctrl button.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon,
+.dark .mapboxgl-ctrl button.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon,
+.dark .mapboxgl-ctrl button.mapboxgl-ctrl-compass .mapboxgl-ctrl-icon,
+.dark .mapboxgl-ctrl button.mapboxgl-ctrl-geolocate .mapboxgl-ctrl-icon {
+  filter: invert(1);
+}
+
+/* Overlay animations */
+.overlay-backdrop {
+  transition: opacity 200ms ease-out;
+}
+
+.overlay-backdrop-hidden {
+  opacity: 0;
+}
+
+.overlay-backdrop-visible {
+  opacity: 1;
+}
+
+.overlay-panel-left {
+  transition: transform 300ms ease-out;
+}
+
+.overlay-panel-left-hidden {
+  transform: translateX(-100%);
+}
+
+.overlay-panel-left-visible {
+  transform: translateX(0);
+}
+
+.overlay-panel-right {
+  transition: transform 300ms ease-out;
+}
+
+.overlay-panel-right-hidden {
+  transform: translateX(100%);
+}
+
+.overlay-panel-right-visible {
+  transform: translateX(0);
+}
+
+/* ==========================================================================
+   Skeleton Wave Animation
+   ========================================================================== */
+
+@keyframes skeleton-wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-wave {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    var(--muted) 40%,
+    color-mix(in srgb, var(--muted-foreground) 15%, var(--muted)) 50%,
+    var(--muted) 60%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 1.5s ease-in-out infinite;
+}

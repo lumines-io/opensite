@@ -1,0 +1,495 @@
+{
+  "common": {
+    "appName": "OpenSite",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "all": "All",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "more": "More",
+    "less": "Less",
+    "viewAll": "View all",
+    "viewMore": "View more",
+    "viewOnMap": "View on map",
+    "notFound": "Not found",
+    "noResults": "No results",
+    "required": "Required"
+  },
+  "nav": {
+    "home": "Home",
+    "map": "Map",
+    "search": "Search",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "suggestions": "My Suggestions",
+    "moderator": "Moderation",
+    "admin": "Admin"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "signInToContinue": "Sign in to your account to continue",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "signUp": "Sign Up",
+    "signingUp": "Signing up...",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "createAccount": "Create Account",
+    "createAccountDesc": "Sign up to contribute to the community",
+    "name": "Name",
+    "namePlaceholder": "Enter your name",
+    "loginFailed": "Login failed",
+    "registerFailed": "Registration failed",
+    "invalidCredentials": "Invalid email or password",
+    "emailExists": "Email already in use",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "invalidEmail": "Invalid email address",
+    "resetPassword": "Reset Password",
+    "resetPasswordDesc": "Enter your email to receive a password reset link",
+    "sendResetLink": "Send Reset Link",
+    "sendingResetLink": "Sending...",
+    "resetLinkSent": "Password reset link sent",
+    "checkEmail": "Please check your email",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "setNewPassword": "Set New Password",
+    "settingPassword": "Setting password...",
+    "passwordResetSuccess": "Password reset successfully",
+    "verifyEmail": "Verify Email",
+    "verifyEmailDesc": "We've sent a verification email to your address",
+    "verifying": "Verifying...",
+    "emailVerified": "Email verified",
+    "emailVerificationFailed": "Email verification failed",
+    "resendVerification": "Resend verification email",
+    "resending": "Resending...",
+    "verificationSent": "Verification email sent",
+    "creatingAccount": "Creating account...",
+    "passwordRequirements": "At least 8 characters with uppercase, lowercase, and number",
+    "passwordNeedsUppercase": "Password must contain an uppercase letter",
+    "passwordNeedsLowercase": "Password must contain a lowercase letter",
+    "passwordNeedsNumber": "Password must contain a number",
+    "nameTooShort": "Name must be at least 2 characters",
+    "goToLogin": "Go to Login",
+    "verificationEmailSent": "We've sent a verification link to <strong>{email}</strong>. Please check your inbox and click the link to verify your account."
+  },
+  "home": {
+    "searchConstruction": "Search constructions",
+    "mapboxRequired": "Mapbox Token Required",
+    "mapboxRequiredDesc": "Add NEXT_PUBLIC_MAPBOX_TOKEN to your environment variables to display the map."
+  },
+  "construction": {
+    "status": {
+      "planned": "Planned",
+      "in-progress": "In Progress",
+      "completed": "Completed",
+      "paused": "Paused",
+      "cancelled": "Cancelled"
+    },
+    "category": {
+      "label": "Category",
+      "public": "Public Infrastructure",
+      "private": "Private Development"
+    },
+    "type": {
+      "road": "Road",
+      "highway": "Highway",
+      "metro": "Metro",
+      "bridge": "Bridge",
+      "tunnel": "Tunnel",
+      "interchange": "Interchange",
+      "station": "Station",
+      "other": "Other"
+    },
+    "privateType": {
+      "label": "Development Type",
+      "residential": "Residential",
+      "commercial": "Commercial",
+      "office": "Office",
+      "mixed_use": "Mixed-Use",
+      "industrial": "Industrial",
+      "hospitality": "Hospitality",
+      "retail": "Retail",
+      "healthcare": "Healthcare",
+      "educational": "Educational",
+      "other": "Other"
+    },
+    "approvalStatus": {
+      "label": "Approval Status",
+      "draft": "Draft",
+      "internal_review": "Internal Review",
+      "submitted": "Submitted for Review",
+      "under_review": "Under Review",
+      "changes_requested": "Changes Requested",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "published": "Published"
+    },
+    "details": {
+      "title": "Project Details",
+      "description": "Project Description",
+      "progress": "Progress",
+      "timeline": "Project Timeline",
+      "budget": "Budget",
+      "contractor": "Contractor",
+      "fundingSource": "Funding Source",
+      "sources": "References",
+      "changelog": "Change History",
+      "metroStations": "Metro Stations"
+    },
+    "dates": {
+      "announced": "Announced Date",
+      "startDate": "Start Date",
+      "expectedEnd": "Expected Completion",
+      "actualEnd": "Actual Completion",
+      "daysRemaining": "Remaining",
+      "daysOverdue": "Overdue",
+      "daysElapsed": "Elapsed",
+      "days": "days"
+    },
+    "actions": {
+      "suggestChange": "Suggest Change",
+      "viewOnMap": "View on Map",
+      "share": "Share"
+    }
+  },
+  "suggestion": {
+    "title": "Suggest Changes",
+    "description": "Contribute information to update construction data",
+    "type": {
+      "label": "Suggestion Type",
+      "new_construction": "New Construction",
+      "update_info": "Update Information",
+      "status_change": "Status Change",
+      "correction": "Correction"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Detailed Description",
+      "sourceUrl": "Source URL",
+      "sourceUrlPlaceholder": "https://...",
+      "evidence": "Evidence/Images"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "in_review": "In Review",
+      "changes_requested": "Changes Requested",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "applied": "Applied"
+    },
+    "actions": {
+      "submit": "Submit Suggestion",
+      "submitting": "Submitting...",
+      "approve": "Approve",
+      "reject": "Reject",
+      "requestChanges": "Request Changes"
+    },
+    "messages": {
+      "submitSuccess": "Suggestion submitted successfully",
+      "submitError": "Failed to submit suggestion",
+      "approveSuccess": "Suggestion approved",
+      "rejectSuccess": "Suggestion rejected"
+    },
+    "mySuggestions": "My Suggestions",
+    "noSuggestions": "You have no suggestions yet",
+    "createFirst": "Create your first suggestion"
+  },
+  "moderator": {
+    "title": "Moderate Suggestions",
+    "description": "Review and process community suggestions",
+    "pendingReview": "Pending Review",
+    "reviewed": "Reviewed",
+    "noSuggestions": "No suggestions",
+    "feedback": "Feedback",
+    "feedbackPlaceholder": "Enter feedback for the submitter...",
+    "startReview": "Start Review"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit Profile",
+    "bio": "Bio",
+    "bioPlaceholder": "Write something about yourself...",
+    "reputation": "Contribution Score",
+    "contributions": "Contributions",
+    "joined": "Joined",
+    "role": {
+      "contributor": "Contributor",
+      "sponsor_user": "Sponsor User",
+      "sponsor_admin": "Sponsor Admin",
+      "moderator": "Moderator",
+      "admin": "Administrator"
+    },
+    "updateSuccess": "Profile updated",
+    "updateError": "Failed to update profile"
+  },
+  "search": {
+    "placeholder": "Search constructions, places...",
+    "advancedSearch": "Advanced Search",
+    "filters": {
+      "status": "Status",
+      "type": "Type",
+      "district": "District",
+      "dateRange": "Date Range",
+      "progress": "Progress"
+    },
+    "results": "{count, plural, =0 {No results} one {1 result} other {# results}}",
+    "searching": "Searching...",
+    "nearby": "Nearby"
+  },
+  "map": {
+    "legend": {
+      "title": "Legend",
+      "planned": "Planned",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "paused": "Paused"
+    },
+    "routing": {
+      "title": "Get Directions",
+      "from": "From",
+      "to": "To",
+      "calculate": "Get Directions",
+      "calculating": "Calculating...",
+      "alerts": "Construction Alerts",
+      "noAlerts": "No constructions on route",
+      "distance": "Distance",
+      "duration": "Duration"
+    },
+    "cluster": "{count} constructions"
+  },
+  "changelog": {
+    "title": "Change History",
+    "noChanges": "No changes yet",
+    "viewAll": "View all",
+    "changes": {
+      "created": "Created",
+      "updated": "Updated",
+      "statusChanged": "Status changed",
+      "progressUpdated": "Progress updated",
+      "infoUpdated": "Information updated"
+    }
+  },
+  "admin": {
+    "scraper": {
+      "title": "Scraper Management",
+      "run": "Run Scraper",
+      "running": "Running...",
+      "status": "Status",
+      "lastRun": "Last Run",
+      "sources": "Sources",
+      "articles": "Articles",
+      "errors": "Errors"
+    },
+    "privateReview": {
+      "title": "Private Construction Review",
+      "description": "Review and approve private construction submissions",
+      "pendingReview": "Pending Review",
+      "underReview": "Under Review",
+      "changesRequested": "Changes Requested",
+      "noSubmissions": "No pending submissions",
+      "startReview": "Start Review",
+      "approve": "Approve",
+      "reject": "Reject",
+      "requestChanges": "Request Changes",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "reviewNotes": "Review Notes",
+      "reviewNotesPlaceholder": "Enter notes for the sponsor...",
+      "checklist": {
+        "title": "Review Checklist",
+        "accuracy": "Data Accuracy",
+        "locationAccurate": "Location/geometry is accurate on map",
+        "projectInfoVerifiable": "Project information is verifiable",
+        "timelineReasonable": "Timeline/dates are reasonable",
+        "marketing": "Marketing Compliance",
+        "noFalseClaims": "No false or misleading claims",
+        "pricingAccurate": "Pricing information is accurate",
+        "noCompetitorAttacks": "No disparagement of competitors",
+        "wordingAppropriate": "Marketing wording is appropriate",
+        "content": "Content Quality",
+        "imagesAppropriate": "Images are appropriate and licensed",
+        "contactValid": "Contact information is valid",
+        "noInappropriateContent": "No inappropriate content",
+        "spellingGrammar": "No spelling or grammar errors",
+        "legal": "Legal & Compliance",
+        "compliesLaws": "Complies with advertising laws",
+        "organizationVerified": "Organization is verified and active",
+        "noProhibitedContent": "No prohibited or restricted content"
+      }
+    }
+  },
+  "organization": {
+    "title": "Organization",
+    "name": "Organization Name",
+    "description": "Description",
+    "logo": "Logo",
+    "brandColor": "Brand Color",
+    "contactInfo": "Contact Information",
+    "email": "Email",
+    "phone": "Phone",
+    "website": "Website",
+    "address": "Address",
+    "status": {
+      "label": "Status",
+      "pending": "Pending Verification",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "businessType": {
+      "label": "Business Type",
+      "developer": "Real Estate Developer",
+      "construction": "Construction Company",
+      "investment": "Investment Group",
+      "property_management": "Property Management",
+      "other": "Other"
+    },
+    "tier": {
+      "label": "Subscription Tier",
+      "basic": "Basic",
+      "professional": "Professional",
+      "enterprise": "Enterprise"
+    },
+    "verification": {
+      "title": "Verification",
+      "businessLicense": "Business License",
+      "verifiedAt": "Verified At",
+      "verifiedBy": "Verified By"
+    }
+  },
+  "sponsor": {
+    "dashboard": "Sponsor Dashboard",
+    "projects": {
+      "title": "My Projects",
+      "description": "Manage your construction projects and track their approval status",
+      "noProjects": "No projects yet",
+      "createFirst": "Create your first project",
+      "viewEdit": "View / Edit",
+      "viewPublic": "View Public Page",
+      "newProject": "New Project",
+      "updated": "Updated",
+      "progress": "Progress"
+    },
+    "myProjects": "My Projects",
+    "createProject": "Create New Project",
+    "analytics": "Analytics",
+    "impressions": "Impressions",
+    "clicks": "Clicks",
+    "ctaClicks": "CTA Clicks",
+    "inquiries": "Inquiries",
+    "marketing": {
+      "title": "Marketing",
+      "headline": "Marketing Headline",
+      "keyFeatures": "Key Features",
+      "priceRange": "Price Range",
+      "videoUrl": "Video URL",
+      "virtualTourUrl": "Virtual Tour URL",
+      "brochure": "Brochure"
+    },
+    "cta": {
+      "title": "Call to Action",
+      "primaryButton": "Primary Button",
+      "contactPhone": "Contact Phone",
+      "contactEmail": "Contact Email",
+      "salesOffice": "Sales Office Address"
+    },
+    "displayOptions": {
+      "title": "Display Options",
+      "featured": "Featured",
+      "priority": "Priority",
+      "showSponsoredBadge": "Show Sponsored Badge",
+      "useCustomMarker": "Use Custom Marker"
+    },
+    "submitForReview": "Submit for Review",
+    "submitForInternalReview": "Submit for Internal Review",
+    "withdraw": "Withdraw Submission",
+    "resubmit": "Resubmit",
+    "messages": {
+      "submitSuccess": "Project submitted for review",
+      "withdrawSuccess": "Submission withdrawn",
+      "approvedNotification": "Your project has been approved!",
+      "rejectedNotification": "Your project submission was not approved",
+      "changesRequestedNotification": "Changes have been requested for your project"
+    }
+  },
+  "errors": {
+    "general": "An error occurred. Please try again.",
+    "network": "Connection error. Please check your network.",
+    "unauthorized": "You need to login to perform this action.",
+    "forbidden": "You don't have permission to perform this action.",
+    "notFound": "The requested content was not found.",
+    "validation": "Invalid data. Please check and try again.",
+    "rateLimit": "Too many requests. Please try again later."
+  },
+  "meta": {
+    "title": "OpenSite - Track Construction Projects",
+    "description": "Track road construction, metro lines, and infrastructure projects. Real-time updates from community and news sources.",
+    "keywords": "construction, road, metro, infrastructure, traffic, opensite"
+  },
+  "language": {
+    "select": "Select Language",
+    "current": "English",
+    "vi": "Vietnamese",
+    "en": "English"
+  },
+  "footer": {
+    "tagline": "Track road construction, metro lines, and infrastructure projects in your city.",
+    "quickLinks": "Quick Links",
+    "home": "Home",
+    "suggestProject": "Suggest a Project",
+    "status": "System Status",
+    "legal": "Legal",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "contact": "Contact Us",
+    "allRightsReserved": "All rights reserved."
+  },
+  "errorPage": {
+    "404": {
+      "title": "Page Not Found",
+      "description": "The page you're looking for doesn't exist or has been moved."
+    },
+    "500": {
+      "title": "Server Error",
+      "description": "Something went wrong on our end. Please try again later."
+    },
+    "goHome": "Go Home",
+    "goBack": "Go Back",
+    "redirecting": "Redirecting to home in {seconds} seconds"
+  },
+  "cookieConsent": {
+    "title": "Cookie Consent",
+    "description": "We use cookies and similar technologies to show personalized ads, analyze traffic, and improve your experience. By clicking \"Accept\", you consent to our use of cookies.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "dismiss": "Dismiss",
+    "managePreferences": "Manage Cookie Preferences"
+  }
+}
