@@ -605,70 +605,73 @@ export function routeToGooglePath(
 }
 
 /**
- * Create an animated polyline with moving dashes (for in-progress constructions)
- * Returns the polyline and an interval ID for cleanup
+ * Create a pulsing polyline with glowing effect (for in-progress constructions)
+ * Returns the polylines and a cleanup function
  */
-export function createAnimatedPolyline(
+export function createPulsingPolyline(
   map: google.maps.Map,
   path: google.maps.LatLngLiteral[],
   color: string,
-  strokeWeight: number = 5
-): { polyline: google.maps.Polyline; intervalId: ReturnType<typeof setInterval> } {
-  // Create dash symbol for animation
-  const dashSymbol: google.maps.Symbol = {
-    path: 'M 0,-1 0,1',
-    strokeOpacity: 1,
-    strokeWeight: strokeWeight,
-    scale: 4,
-  };
+  options: {
+    strokeWeight?: number;
+    zIndex?: number;
+    animationSpeed?: 'slow' | 'normal' | 'fast';
+  } = {}
+): { polylines: google.maps.Polyline[]; cleanup: () => void } {
+  const { strokeWeight = 5, zIndex = 100, animationSpeed = 'normal' } = options;
 
-  // Create base polyline (solid line underneath)
+  // Create base polyline (solid line on top)
+  // Set clickable: false so mouse events pass through to Data Layer
   const basePolyline = new google.maps.Polyline({
     path,
     strokeColor: color,
-    strokeOpacity: 0.3,
-    strokeWeight: strokeWeight + 2,
+    strokeWeight: strokeWeight,
+    strokeOpacity: 1,
     map,
+    zIndex,
+    clickable: false,
   });
 
-  // Create animated polyline with dashed line
-  const animatedPolyline = new google.maps.Polyline({
+  // Create glow polyline (wider, semi-transparent, pulsing)
+  // Set clickable: false so mouse events pass through to Data Layer
+  const glowPolyline = new google.maps.Polyline({
     path,
-    strokeOpacity: 0,
-    strokeWeight: 0,
-    icons: [
-      {
-        icon: dashSymbol,
-        offset: '0',
-        repeat: '20px',
-      },
-    ],
+    strokeColor: color,
+    strokeWeight: strokeWeight * 2.5,
+    strokeOpacity: 0.3,
     map,
+    zIndex: zIndex - 1,
+    clickable: false,
   });
 
-  // Set dash color
-  animatedPolyline.set('strokeColor', color);
+  // Animate opacity for pulse effect
+  let opacity = 0.3;
+  let increasing = true;
+  const speeds = { slow: 80, normal: 50, fast: 30 };
+  const interval = speeds[animationSpeed];
 
-  // Animate the dash offset
-  let offset = 0;
-  const intervalId = setInterval(() => {
-    offset = (offset + 1) % 200;
-    const icons = animatedPolyline.get('icons') as google.maps.IconSequence[];
-    if (icons && icons.length > 0) {
-      icons[0].offset = offset / 2 + '%';
-      animatedPolyline.set('icons', icons);
+  const animationId = setInterval(() => {
+    if (increasing) {
+      opacity += 0.02;
+      if (opacity >= 0.5) increasing = false;
+    } else {
+      opacity -= 0.02;
+      if (opacity <= 0.15) increasing = true;
     }
-  }, 50);
+    glowPolyline.setOptions({ strokeOpacity: opacity });
+  }, interval);
 
-  // Return a combined polyline object with cleanup method
-  return {
-    polyline: animatedPolyline,
-    intervalId,
+  const cleanup = () => {
+    clearInterval(animationId);
+    basePolyline.setMap(null);
+    glowPolyline.setMap(null);
   };
+
+  return { polylines: [basePolyline, glowPolyline], cleanup };
 }
 
 /**
- * Create animated polylines for all in-progress LineString features
+ * Create pulsing polylines for all in-progress LineString features
  * Returns cleanup function to remove polylines and stop animations
  */
 export function createAnimatedPolylinesForFeatures(
@@ -678,9 +681,7 @@ export function createAnimatedPolylinesForFeatures(
   visibleStatuses: Set<string>,
   visibleSourceCollections: Set<string>
 ): () => void {
-  const polylines: google.maps.Polyline[] = [];
-  const intervalIds: ReturnType<typeof setInterval>[] = [];
-  const basePolylines: google.maps.Polyline[] = [];
+  const cleanupFunctions: (() => void)[] = [];
 
   for (const feature of features) {
     // Only process constructions that are in-progress and LineString geometry
@@ -706,62 +707,18 @@ export function createAnimatedPolylinesForFeatures(
     const path = geoJsonPathToLatLngPath(coords);
     const color = getTypeColor(props.constructionType);
 
-    // Create base polyline (solid line underneath)
-    const basePolyline = new google.maps.Polyline({
-      path,
-      strokeColor: color,
-      strokeOpacity: 0.3,
-      strokeWeight: 7,
-      map,
-      zIndex: 1,
-    });
-    basePolylines.push(basePolyline);
-
-    // Create dash symbol for animation
-    const dashSymbol: google.maps.Symbol = {
-      path: 'M 0,-1 0,1',
-      strokeOpacity: 1,
-      strokeColor: color,
-      strokeWeight: 4,
-      scale: 4,
-    };
-
-    // Create animated polyline with dashed line
-    const animatedPolyline = new google.maps.Polyline({
-      path,
-      strokeOpacity: 0,
-      strokeWeight: 0,
-      icons: [
-        {
-          icon: dashSymbol,
-          offset: '0',
-          repeat: '20px',
-        },
-      ],
-      map,
-      zIndex: 2,
+    // Create pulsing polyline
+    const { cleanup } = createPulsingPolyline(map, path, color, {
+      strokeWeight: 5,
+      zIndex: 100,
+      animationSpeed: 'normal',
     });
 
-    polylines.push(animatedPolyline);
-
-    // Animate the dash offset
-    let offset = 0;
-    const intervalId = setInterval(() => {
-      offset = (offset + 1) % 200;
-      const icons = animatedPolyline.get('icons') as google.maps.IconSequence[];
-      if (icons && icons.length > 0) {
-        icons[0].offset = offset / 2 + '%';
-        animatedPolyline.set('icons', icons);
-      }
-    }, 50);
-
-    intervalIds.push(intervalId);
+    cleanupFunctions.push(cleanup);
   }
 
-  // Return cleanup function
+  // Return cleanup function that cleans up all polylines
   return () => {
-    polylines.forEach((p) => p.setMap(null));
-    basePolylines.forEach((p) => p.setMap(null));
-    intervalIds.forEach((id) => clearInterval(id));
+    cleanupFunctions.forEach((cleanup) => cleanup());
   };
 }
