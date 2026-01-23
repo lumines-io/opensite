@@ -63,6 +63,8 @@ export {
   isGeometryInBounds,
   calculateFeaturesBounds,
   routeToGooglePath,
+  createAnimatedPolyline,
+  createPulsingPolyline,
 } from './google-map.utils';
 
 // Style option types for customization

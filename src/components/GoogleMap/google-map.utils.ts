@@ -425,6 +425,141 @@ export interface LineStyleOptions {
   strokeOpacity?: number;
   dashPattern?: number[];
   zIndex?: number;
+  animated?: boolean;
+  animationSpeed?: 'slow' | 'normal' | 'fast';
+}
+
+/**
+ * Animation intervals in milliseconds for animated polylines
+ */
+const LINE_ANIMATION_SPEEDS = {
+  slow: 100,
+  normal: 50,
+  fast: 25,
+};
+
+/**
+ * Create an animated polyline with moving dash pattern
+ * Returns a cleanup function to stop the animation
+ */
+export function createAnimatedPolyline(
+  map: google.maps.Map,
+  path: google.maps.LatLngLiteral[],
+  color: string,
+  options: {
+    strokeWeight?: number;
+    zIndex?: number;
+    animationSpeed?: 'slow' | 'normal' | 'fast';
+  } = {}
+): { polyline: google.maps.Polyline; cleanup: () => void } {
+  const { strokeWeight = 5, zIndex = 100, animationSpeed = 'normal' } = options;
+
+  // Create the animated line symbol
+  const lineSymbol: google.maps.Symbol = {
+    path: 'M 0,-1 0,1',
+    strokeOpacity: 1,
+    strokeWeight: strokeWeight,
+    scale: 4,
+  };
+
+  // Create the polyline with repeating symbols
+  const polyline = new google.maps.Polyline({
+    path,
+    strokeOpacity: 0, // Hide the base line
+    strokeColor: color,
+    strokeWeight: strokeWeight,
+    icons: [
+      {
+        icon: lineSymbol,
+        offset: '0',
+        repeat: '20px',
+      },
+    ],
+    map,
+    zIndex,
+  });
+
+  // Animate the line by moving the icon offset
+  let offset = 0;
+  const interval = LINE_ANIMATION_SPEEDS[animationSpeed];
+
+  const animationId = setInterval(() => {
+    offset = (offset + 1) % 200;
+    const icons = polyline.get('icons');
+    if (icons && icons[0]) {
+      icons[0].offset = offset / 2 + '%';
+      polyline.set('icons', icons);
+    }
+  }, interval);
+
+  const cleanup = () => {
+    clearInterval(animationId);
+    polyline.setMap(null);
+  };
+
+  return { polyline, cleanup };
+}
+
+/**
+ * Create a pulsing glow polyline effect
+ * Returns a cleanup function to stop the animation
+ */
+export function createPulsingPolyline(
+  map: google.maps.Map,
+  path: google.maps.LatLngLiteral[],
+  color: string,
+  options: {
+    strokeWeight?: number;
+    zIndex?: number;
+    animationSpeed?: 'slow' | 'normal' | 'fast';
+  } = {}
+): { polylines: google.maps.Polyline[]; cleanup: () => void } {
+  const { strokeWeight = 5, zIndex = 100, animationSpeed = 'normal' } = options;
+
+  // Create base polyline
+  const basePolyline = new google.maps.Polyline({
+    path,
+    strokeColor: color,
+    strokeWeight: strokeWeight,
+    strokeOpacity: 1,
+    map,
+    zIndex,
+  });
+
+  // Create glow polyline (wider, semi-transparent)
+  const glowPolyline = new google.maps.Polyline({
+    path,
+    strokeColor: color,
+    strokeWeight: strokeWeight * 2.5,
+    strokeOpacity: 0.3,
+    map,
+    zIndex: zIndex - 1,
+  });
+
+  // Animate opacity
+  let opacity = 0.3;
+  let increasing = true;
+  const speeds = { slow: 80, normal: 50, fast: 30 };
+  const interval = speeds[animationSpeed];
+
+  const animationId = setInterval(() => {
+    if (increasing) {
+      opacity += 0.02;
+      if (opacity >= 0.5) increasing = false;
+    } else {
+      opacity -= 0.02;
+      if (opacity <= 0.15) increasing = true;
+    }
+    glowPolyline.setOptions({ strokeOpacity: opacity });
+  }, interval);
+
+  const cleanup = () => {
+    clearInterval(animationId);
+    basePolyline.setMap(null);
+    glowPolyline.setMap(null);
+  };
+
+  return { polylines: [basePolyline, glowPolyline], cleanup };
 }
 
 /**

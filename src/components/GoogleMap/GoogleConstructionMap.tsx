@@ -33,6 +33,9 @@ import {
   getGeometryCenter,
   getMarkerColor,
   createMarkerIcon,
+  createPulsingPolyline,
+  getTypeColor,
+  getPrivateTypeColor,
 } from './google-map.utils';
 import { GoogleMapInfoWindow } from './GoogleMapInfoWindow';
 import { GoogleMapLegend } from './GoogleMapLegend';
@@ -72,6 +75,7 @@ export function GoogleConstructionMap({
   const dataLayerRef = useRef<google.maps.Data | null>(null);
   const routePolylineRef = useRef<google.maps.Polyline | null>(null);
   const alertMarkersRef = useRef<google.maps.Marker[]>([]);
+  const animatedPolylinesRef = useRef<Array<{ id: string; cleanup: () => void }>>([]);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const viewportTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasFlownToUserLocation = useRef(false);
@@ -165,6 +169,10 @@ export function GoogleConstructionMap({
       dataLayerRef.current.setMap(null);
     }
 
+    // Cleanup existing animated polylines
+    animatedPolylinesRef.current.forEach(({ cleanup }) => cleanup());
+    animatedPolylinesRef.current = [];
+
     // Create new data layer
     const dataLayer = new google.maps.Data({ map });
     dataLayerRef.current = dataLayer;
@@ -172,11 +180,55 @@ export function GoogleConstructionMap({
     // Add GeoJSON features
     dataLayer.addGeoJson(geojsonData);
 
+    // Track which feature IDs have animated polylines
+    const animatedFeatureIds = new Set<string>();
+
+    // Create animated polylines for in-progress LineString features
+    geojsonData.features.forEach((feature) => {
+      if (!feature.geometry || !feature.properties) return;
+
+      const type = feature.properties.constructionType as string;
+      const status = feature.properties.constructionStatus as string;
+      const category = (feature.properties.constructionCategory as string) || 'public';
+      const privateType = feature.properties.privateType as string;
+      const id = feature.properties.id as string;
+
+      // Only animate in-progress LineStrings that pass filters
+      if (
+        feature.geometry.type === 'LineString' &&
+        status === 'in-progress' &&
+        visibleTypes.has(type) &&
+        visibleStatuses.has(status) &&
+        visibleCategories.has(category)
+      ) {
+        // Get color based on category and type
+        const color = category === 'private' && privateType
+          ? getPrivateTypeColor(privateType)
+          : getTypeColor(type);
+
+        // Convert coordinates to Google Maps path
+        const path = geoJsonPathToLatLngPath(
+          feature.geometry.coordinates as [number, number][]
+        );
+
+        // Create animated polyline
+        const { cleanup } = createPulsingPolyline(map, path, color, {
+          strokeWeight: 5,
+          zIndex: 100,
+          animationSpeed: 'normal',
+        });
+
+        animatedPolylinesRef.current.push({ id, cleanup });
+        animatedFeatureIds.add(id);
+      }
+    });
+
     // Apply styling based on filters
     dataLayer.setStyle((feature) => {
       const type = feature.getProperty('constructionType') as string;
       const status = feature.getProperty('constructionStatus') as string;
       const category = (feature.getProperty('constructionCategory') as string) || 'public';
+      const id = feature.getProperty('id') as string;
 
       // Hide if not in filters
       if (
@@ -184,6 +236,11 @@ export function GoogleConstructionMap({
         !visibleStatuses.has(status) ||
         !visibleCategories.has(category)
       ) {
+        return { visible: false };
+      }
+
+      // Hide LineStrings that have animated polylines (to avoid double rendering)
+      if (animatedFeatureIds.has(id)) {
         return { visible: false };
       }
 
@@ -257,6 +314,9 @@ export function GoogleConstructionMap({
 
     return () => {
       dataLayer.setMap(null);
+      // Cleanup animated polylines when effect re-runs
+      animatedPolylinesRef.current.forEach(({ cleanup }) => cleanup());
+      animatedPolylinesRef.current = [];
     };
   }, [geojsonData, visibleTypes, visibleStatuses, visibleCategories, onSelectConstruction]);
 
