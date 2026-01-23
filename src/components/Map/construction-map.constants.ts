@@ -97,6 +97,8 @@ export const TYPE_COLORS: Record<string, string> = {
   'interchange': '#DB2777',  // pink - complex junction
   'road': '#2563EB',         // blue - standard road
   'station': '#8B5CF6',      // violet - transit station
+  'metro_station': '#A855F7', // purple-500 - metro station markers
+  'freeway_exit': '#EF4444', // red-500 - freeway exit markers
   'other': '#6B7280',        // gray - misc
 };
 
@@ -109,6 +111,8 @@ export const TYPE_THICKNESS: Record<string, number> = {
   'interchange': 7,
   'road': 4,
   'station': 5,
+  'metro_station': 4,
+  'freeway_exit': 4,
   'other': 3,
 };
 
@@ -121,6 +125,8 @@ export const TYPE_RADIUS: Record<string, number> = {
   'interchange': 10,
   'road': 7,
   'station': 8,
+  'metro_station': 6,
+  'freeway_exit': 6,
   'other': 6,
 };
 
@@ -136,6 +142,8 @@ export const TYPE_LABELS: Record<string, string> = {
   'interchange': 'Nút giao',
   'road': 'Đường',
   'station': 'Trạm',
+  'metro_station': 'Ga Metro',
+  'freeway_exit': 'Nút ra/vào',
   'other': 'Khác',
 };
 
@@ -148,6 +156,8 @@ export const TYPE_ICON_NAMES: Record<string, string> = {
   'interchange': 'icon-interchange',
   'road': 'icon-road',
   'station': 'icon-station',
+  'metro_station': 'icon-metro-station',
+  'freeway_exit': 'icon-freeway-exit',
   'other': 'icon-other',
 };
 
@@ -160,6 +170,8 @@ export const TYPE_SHORT_LABELS: Record<string, string> = {
   'interchange': 'NG',
   'road': 'Đ',
   'station': 'T',
+  'metro_station': 'G',
+  'freeway_exit': 'E',
   'other': 'K',
 };
 
@@ -194,6 +206,10 @@ export const LAYER_IDS = {
   POLYGON_OUTLINES: 'construction-polygon-outlines',
   CLUSTERS: 'clusters',
   CLUSTER_COUNT: 'cluster-count',
+  // Detail markers (metro stations, freeway exits)
+  DETAIL_MARKERS: 'detail-markers',
+  DETAIL_MARKERS_PULSE: 'detail-markers-pulse',
+  DETAIL_MARKERS_LABELS: 'detail-markers-labels',
   ROUTE: 'route-line',
   ROUTE_OUTLINE: 'route-line-outline',
   ROUTE_ALERTS: 'route-alerts',
@@ -205,6 +221,7 @@ export const SOURCE_IDS = {
   POINTS: 'construction-points-source',
   LINES: 'construction-lines-source',
   POLYGONS: 'construction-polygons-source',
+  DETAIL_MARKERS: 'detail-markers-source',
   ROUTE: 'route-source',
   ROUTE_ALERTS: 'route-alerts-source',
 } as const;
@@ -214,6 +231,7 @@ export const INTERACTIVE_LAYERS = [
   LAYER_IDS.POINTS,
   LAYER_IDS.POLYGONS,
   LAYER_IDS.LINES,
+  LAYER_IDS.DETAIL_MARKERS,
 ] as const;
 
 // Cluster configuration
@@ -227,6 +245,7 @@ export const ZOOM_LEVELS = {
   SHOW_ALL: 12,      // Show all construction types at this zoom level and above
   MIN_SCALE: 8,      // Minimum zoom level for scaling
   MAX_SCALE: 16,     // Maximum zoom level for scaling
+  SHOW_DETAIL_MARKERS: 13, // Show detail markers (stations, exits) at this zoom and above
 } as const;
 
 // Scale factors for different zoom levels

@@ -15,15 +15,19 @@ import {
   GOOGLE_MAPS_LIBRARIES,
   TYPE_COLORS,
   STATUS_COLORS,
-  CATEGORY_COLORS,
+  SOURCE_COLLECTION_COLORS,
+  DEVELOPMENT_TYPE_COLORS,
 } from './google-map.constants';
 import type {
   GoogleConstructionMapProps,
   Construction,
+  Development,
+  MapFeature,
   ConstructionFeature,
   LatLng,
   VisibilityFilters,
 } from './google-map.types';
+import { isConstruction, isDevelopment } from './google-map.types';
 import {
   featureCollectionToConstructionFeatures,
   getFeatureStyle,
@@ -33,11 +37,6 @@ import {
   getGeometryCenter,
   getMarkerColor,
   createMarkerIcon,
-  createStatusMarkerIcon,
-  createPulsingPolyline,
-  getTypeColor,
-  getPrivateTypeColor,
-  geoJsonToLatLng,
 } from './google-map.utils';
 import { GoogleMapInfoWindow } from './GoogleMapInfoWindow';
 import { GoogleMapLegend } from './GoogleMapLegend';
@@ -77,12 +76,9 @@ export function GoogleConstructionMap({
   const dataLayerRef = useRef<google.maps.Data | null>(null);
   const routePolylineRef = useRef<google.maps.Polyline | null>(null);
   const alertMarkersRef = useRef<google.maps.Marker[]>([]);
-  const pointMarkersRef = useRef<Array<{ id: string; marker: google.maps.Marker }>>([]);
-  const animatedPolylinesRef = useRef<Array<{ id: string; cleanup: () => void }>>([]);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const viewportTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasFlownToUserLocation = useRef(false);
-  const isMouseInPopupRef = useRef(false);
 
   const { theme } = useTheme();
 
@@ -105,7 +101,7 @@ export function GoogleConstructionMap({
   const [geojsonData, setGeojsonData] = useState<GeoJSON.FeatureCollection | null>(null);
 
   // Popup state
-  const [activeConstruction, setActiveConstruction] = useState<Construction | null>(null);
+  const [activeFeature, setActiveFeature] = useState<MapFeature | null>(null);
   const [popupPosition, setPopupPosition] = useState<LatLng | null>(null);
   const [isMouseInPopup, setIsMouseInPopup] = useState(false);
 
@@ -116,22 +112,29 @@ export function GoogleConstructionMap({
   const [visibleStatuses, setVisibleStatuses] = useState<Set<string>>(
     () => new Set(Object.keys(STATUS_COLORS))
   );
-  const [visibleCategories, setVisibleCategories] = useState<Set<string>>(
-    () => new Set(Object.keys(CATEGORY_COLORS))
+  const [visibleSourceCollections, setVisibleSourceCollections] = useState<Set<string>>(
+    () => new Set(Object.keys(SOURCE_COLLECTION_COLORS))
+  );
+  const [visibleDevelopmentTypes, setVisibleDevelopmentTypes] = useState<Set<string>>(
+    () => new Set(Object.keys(DEVELOPMENT_TYPE_COLORS))
   );
 
   // Modal state
   const [isListModalOpen, setIsListModalOpen] = useState(false);
-  const [visibleConstructions, setVisibleConstructions] = useState<Construction[]>([]);
+  const [visibleFeatures, setVisibleFeatures] = useState<MapFeature[]>([]);
+
+  // Zoom state (for detail marker visibility)
+  const [currentZoom, setCurrentZoom] = useState(initialZoom);
 
   // Memoized filters
   const filters: VisibilityFilters = useMemo(
     () => ({
       visibleTypes,
       visibleStatuses,
-      visibleCategories,
+      visibleCategories: visibleSourceCollections,
+      visibleDevelopmentTypes,
     }),
-    [visibleTypes, visibleStatuses, visibleCategories]
+    [visibleTypes, visibleStatuses, visibleSourceCollections, visibleDevelopmentTypes]
   );
 
   // Fetch construction data
@@ -162,23 +165,6 @@ export function GoogleConstructionMap({
     }
   }, [theme]);
 
-  // Schedule popup hide with delay (defined early so it can be used in the Data Layer effect)
-  const scheduleHidePopup = useCallback(() => {
-    if (isMouseInPopup) return;
-
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-    }
-
-    hideTimeoutRef.current = setTimeout(() => {
-      if (!isMouseInPopup) {
-        setActiveConstruction(null);
-        setPopupPosition(null);
-      }
-      hideTimeoutRef.current = null;
-    }, POPUP_HIDE_DELAY);
-  }, [isMouseInPopup]);
-
   // Add/update Data Layer with GeoJSON
   useEffect(() => {
     if (!mapRef.current || !geojsonData) return;
@@ -190,14 +176,6 @@ export function GoogleConstructionMap({
       dataLayerRef.current.setMap(null);
     }
 
-    // Cleanup existing animated polylines
-    animatedPolylinesRef.current.forEach(({ cleanup }) => cleanup());
-    animatedPolylinesRef.current = [];
-
-    // Cleanup existing point markers
-    pointMarkersRef.current.forEach(({ marker }) => marker.setMap(null));
-    pointMarkersRef.current = [];
-
     // Create new data layer
     const dataLayer = new google.maps.Data({ map });
     dataLayerRef.current = dataLayer;
@@ -205,203 +183,112 @@ export function GoogleConstructionMap({
     // Add GeoJSON features
     dataLayer.addGeoJson(geojsonData);
 
-    // Track which feature IDs have custom rendering (animated polylines or point markers)
-    const customRenderedIds = new Set<string>();
+    // Apply styling based on filters and zoom level
+    dataLayer.setStyle((feature) => {
+      const sourceCollection = feature.getProperty('sourceCollection') as string;
 
-    // Create markers for Point features and animated polylines for in-progress LineStrings
-    geojsonData.features.forEach((feature) => {
-      if (!feature.geometry || !feature.properties) return;
-
-      const type = feature.properties.constructionType as string;
-      const status = feature.properties.constructionStatus as string;
-      const category = (feature.properties.constructionCategory as string) || 'public';
-      const privateType = feature.properties.privateType as string;
-      const id = feature.properties.id as string;
-
-      // Check if feature passes filters
-      const passesFilters =
-        visibleTypes.has(type) &&
-        visibleStatuses.has(status) &&
-        visibleCategories.has(category);
-
-      if (!passesFilters) return;
-
-      // Get color based on category and type
-      const color = category === 'private' && privateType
-        ? getPrivateTypeColor(privateType)
-        : getTypeColor(type);
-
-      // Handle Point features - create separate markers with SVG icons
-      if (feature.geometry.type === 'Point') {
-        const position = geoJsonToLatLng(feature.geometry.coordinates as [number, number]);
-        const icon = createStatusMarkerIcon(color, status, type);
-
-        const marker = new google.maps.Marker({
-          position,
-          map,
-          icon,
-          title: feature.properties.title as string,
-          zIndex: status === 'in-progress' ? 100 : status === 'completed' ? 50 : 75,
-        });
-
-        // Add click listener to marker
-        marker.addListener('click', () => {
-          const props = {
-            id: feature.properties!.id as string,
-            slug: feature.properties!.slug as string,
-            title: feature.properties!.title as string,
-            excerpt: feature.properties!.excerpt as string,
-            constructionStatus: feature.properties!.constructionStatus as string,
-            progress: feature.properties!.progress as number,
-            constructionType: feature.properties!.constructionType as string,
-            constructionCategory: feature.properties!.constructionCategory as 'public' | 'private',
-            privateType: feature.properties!.privateType as string,
-            organizationName: feature.properties!.organizationName as string,
-            startDate: feature.properties!.startDate as string,
-            expectedEndDate: feature.properties!.expectedEndDate as string,
-          };
-          setActiveConstruction(props);
-          setPopupPosition(position);
-          onSelectConstruction?.(props.id);
-        });
-
-        // Add mouseover listener
-        marker.addListener('mouseover', () => {
-          if (hideTimeoutRef.current) {
-            clearTimeout(hideTimeoutRef.current);
-            hideTimeoutRef.current = null;
-          }
-          const props = {
-            id: feature.properties!.id as string,
-            slug: feature.properties!.slug as string,
-            title: feature.properties!.title as string,
-            excerpt: feature.properties!.excerpt as string,
-            constructionStatus: feature.properties!.constructionStatus as string,
-            progress: feature.properties!.progress as number,
-            constructionType: feature.properties!.constructionType as string,
-            constructionCategory: feature.properties!.constructionCategory as 'public' | 'private',
-            privateType: feature.properties!.privateType as string,
-            organizationName: feature.properties!.organizationName as string,
-            startDate: feature.properties!.startDate as string,
-            expectedEndDate: feature.properties!.expectedEndDate as string,
-          };
-          setActiveConstruction(props);
-          setPopupPosition(position);
-        });
-
-        // Add mouseout listener
-        marker.addListener('mouseout', () => {
-          scheduleHidePopup();
-        });
-
-        pointMarkersRef.current.push({ id, marker });
-        customRenderedIds.add(id);
+      // Check source collection filter first
+      if (!visibleSourceCollections.has(sourceCollection)) {
+        return { visible: false };
       }
 
-      // Handle in-progress LineStrings - create animated polylines
-      if (feature.geometry.type === 'LineString' && status === 'in-progress') {
-        const path = geoJsonPathToLatLngPath(
-          feature.geometry.coordinates as [number, number][]
-        );
+      if (sourceCollection === 'constructions') {
+        // Construction filtering
+        const type = feature.getProperty('constructionType') as string;
+        const status = feature.getProperty('constructionStatus') as string;
+        const isDetailMarker = feature.getProperty('isDetailMarker') as boolean;
 
-        const { polylines, cleanup } = createPulsingPolyline(map, path, color, {
-          strokeWeight: 5,
-          zIndex: 100,
-          animationSpeed: 'normal',
-        });
-
-        // Add event listeners to the base polyline (first one)
-        const basePolyline = polylines[0];
-        if (basePolyline) {
-          const props = {
-            id: feature.properties!.id as string,
-            slug: feature.properties!.slug as string,
-            title: feature.properties!.title as string,
-            excerpt: feature.properties!.excerpt as string,
-            constructionStatus: feature.properties!.constructionStatus as string,
-            progress: feature.properties!.progress as number,
-            constructionType: feature.properties!.constructionType as string,
-            constructionCategory: feature.properties!.constructionCategory as 'public' | 'private',
-            privateType: feature.properties!.privateType as string,
-            organizationName: feature.properties!.organizationName as string,
-            startDate: feature.properties!.startDate as string,
-            expectedEndDate: feature.properties!.expectedEndDate as string,
-          };
-
-          // Calculate center of the line for popup position
-          const midIdx = Math.floor(path.length / 2);
-          const lineCenter = path[midIdx] || path[0];
-
-          basePolyline.addListener('click', (e: google.maps.PolyMouseEvent) => {
-            setActiveConstruction(props);
-            setPopupPosition(e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : lineCenter);
-            onSelectConstruction?.(props.id);
-          });
-
-          basePolyline.addListener('mouseover', (e: google.maps.PolyMouseEvent) => {
-            map.getDiv().style.cursor = 'pointer';
-            if (hideTimeoutRef.current) {
-              clearTimeout(hideTimeoutRef.current);
-              hideTimeoutRef.current = null;
-            }
-            setActiveConstruction(props);
-            setPopupPosition(e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : lineCenter);
-          });
-
-          basePolyline.addListener('mouseout', () => {
-            map.getDiv().style.cursor = '';
-            scheduleHidePopup();
-          });
+        // Hide detail markers (metro_station, freeway_exit) if their parent type is filtered out
+        if (isDetailMarker) {
+          // Metro stations should follow metro filter, freeway exits should follow highway filter
+          const parentType = type === 'metro_station' ? 'metro' : type === 'freeway_exit' ? 'highway' : type;
+          if (!visibleTypes.has(parentType)) {
+            return { visible: false };
+          }
+        } else {
+          // Hide if not in type filters
+          if (!visibleTypes.has(type)) {
+            return { visible: false };
+          }
         }
 
-        animatedPolylinesRef.current.push({ id, cleanup });
-        customRenderedIds.add(id);
+        // Hide if not in status filters
+        if (!visibleStatuses.has(status)) {
+          return { visible: false };
+        }
+      } else if (sourceCollection === 'developments') {
+        // Development filtering
+        const developmentType = feature.getProperty('developmentType') as string;
+
+        // Hide if not in development type filters
+        if (!visibleDevelopmentTypes.has(developmentType)) {
+          return { visible: false };
+        }
       }
+
+      // Pass current zoom to getFeatureStyle for detail marker zoom-based visibility
+      return getFeatureStyle(feature, currentZoom);
     });
 
-    // Apply styling based on filters
-    dataLayer.setStyle((feature) => {
-      const type = feature.getProperty('constructionType') as string;
-      const status = feature.getProperty('constructionStatus') as string;
-      const category = (feature.getProperty('constructionCategory') as string) || 'public';
-      const id = feature.getProperty('id') as string;
+    // Helper to extract feature properties
+    const extractFeatureProps = (feature: google.maps.Data.Feature): MapFeature => {
+      const sourceCollection = feature.getProperty('sourceCollection') as 'constructions' | 'developments';
 
-      // Hide if not in filters
-      if (
-        !visibleTypes.has(type) ||
-        !visibleStatuses.has(status) ||
-        !visibleCategories.has(category)
-      ) {
-        return { visible: false };
+      if (sourceCollection === 'developments') {
+        return {
+          id: feature.getProperty('id') as string,
+          slug: feature.getProperty('slug') as string,
+          title: feature.getProperty('title') as string,
+          excerpt: feature.getProperty('excerpt') as string,
+          sourceCollection: 'developments',
+          developmentStatus: feature.getProperty('developmentStatus') as string,
+          developmentType: feature.getProperty('developmentType') as string,
+          organizationName: feature.getProperty('organizationName') as string,
+          headline: feature.getProperty('headline') as string,
+          priceDisplay: feature.getProperty('priceDisplay') as string,
+          featured: feature.getProperty('featured') as boolean,
+          priority: feature.getProperty('priority') as number,
+          showSponsoredBadge: feature.getProperty('showSponsoredBadge') as boolean,
+          useCustomMarker: feature.getProperty('useCustomMarker') as boolean,
+          markerColor: feature.getProperty('markerColor') as string,
+          launchDate: feature.getProperty('launchDate') as string,
+          expectedCompletion: feature.getProperty('expectedCompletion') as string,
+        } as Development;
       }
 
-      // Hide features that have custom rendering (point markers or animated polylines)
-      if (customRenderedIds.has(id)) {
-        return { visible: false };
-      }
-
-      return getFeatureStyle(feature);
-    });
-
-    // Handle click events
-    dataLayer.addListener('click', (event: google.maps.Data.MouseEvent) => {
-      const feature = event.feature;
-      const props = {
+      return {
         id: feature.getProperty('id') as string,
         slug: feature.getProperty('slug') as string,
         title: feature.getProperty('title') as string,
         excerpt: feature.getProperty('excerpt') as string,
+        sourceCollection: 'constructions',
         constructionStatus: feature.getProperty('constructionStatus') as string,
         progress: feature.getProperty('progress') as number,
         constructionType: feature.getProperty('constructionType') as string,
-        constructionCategory: feature.getProperty('constructionCategory') as 'public' | 'private',
-        privateType: feature.getProperty('privateType') as string,
-        organizationName: feature.getProperty('organizationName') as string,
         startDate: feature.getProperty('startDate') as string,
         expectedEndDate: feature.getProperty('expectedEndDate') as string,
-      };
+        // Detail marker properties (generic)
+        isDetailMarker: feature.getProperty('isDetailMarker') as boolean,
+        parentId: feature.getProperty('parentId') as string | number,
+        parentTitle: feature.getProperty('parentTitle') as string,
+        pointType: feature.getProperty('pointType') as string,
+        pointOrder: feature.getProperty('pointOrder') as number,
+        pointDescription: feature.getProperty('pointDescription') as string,
+        openedAt: feature.getProperty('openedAt') as string,
+        // Legacy detail marker properties
+        stationOrder: feature.getProperty('stationOrder') as number,
+        exitOrder: feature.getProperty('exitOrder') as number,
+        exitType: feature.getProperty('exitType') as string,
+        connectedRoads: feature.getProperty('connectedRoads') as string,
+      } as Construction;
+    };
 
-      setActiveConstruction(props);
+    // Handle click events
+    dataLayer.addListener('click', (event: google.maps.Data.MouseEvent) => {
+      const feature = event.feature;
+      const props = extractFeatureProps(feature);
+
+      setActiveFeature(props);
       setPopupPosition({
         lat: event.latLng?.lat() || 0,
         lng: event.latLng?.lng() || 0,
@@ -414,20 +301,7 @@ export function GoogleConstructionMap({
       map.getDiv().style.cursor = 'pointer';
 
       const feature = event.feature;
-      const props = {
-        id: feature.getProperty('id') as string,
-        slug: feature.getProperty('slug') as string,
-        title: feature.getProperty('title') as string,
-        excerpt: feature.getProperty('excerpt') as string,
-        constructionStatus: feature.getProperty('constructionStatus') as string,
-        progress: feature.getProperty('progress') as number,
-        constructionType: feature.getProperty('constructionType') as string,
-        constructionCategory: feature.getProperty('constructionCategory') as 'public' | 'private',
-        privateType: feature.getProperty('privateType') as string,
-        organizationName: feature.getProperty('organizationName') as string,
-        startDate: feature.getProperty('startDate') as string,
-        expectedEndDate: feature.getProperty('expectedEndDate') as string,
-      };
+      const props = extractFeatureProps(feature);
 
       // Clear any pending hide timeout
       if (hideTimeoutRef.current) {
@@ -435,7 +309,7 @@ export function GoogleConstructionMap({
         hideTimeoutRef.current = null;
       }
 
-      setActiveConstruction(props);
+      setActiveFeature(props);
       setPopupPosition({
         lat: event.latLng?.lat() || 0,
         lng: event.latLng?.lng() || 0,
@@ -450,14 +324,8 @@ export function GoogleConstructionMap({
 
     return () => {
       dataLayer.setMap(null);
-      // Cleanup point markers when effect re-runs
-      pointMarkersRef.current.forEach(({ marker }) => marker.setMap(null));
-      pointMarkersRef.current = [];
-      // Cleanup animated polylines when effect re-runs
-      animatedPolylinesRef.current.forEach(({ cleanup }) => cleanup());
-      animatedPolylinesRef.current = [];
     };
-  }, [geojsonData, visibleTypes, visibleStatuses, visibleCategories, onSelectConstruction, scheduleHidePopup]);
+  }, [geojsonData, visibleTypes, visibleStatuses, visibleSourceCollections, visibleDevelopmentTypes, currentZoom, onSelectConstruction]);
 
   // Add route polyline
   useEffect(() => {
@@ -524,19 +392,36 @@ export function GoogleConstructionMap({
     };
   }, []);
 
+  // Schedule popup hide with delay
+  const scheduleHidePopup = useCallback(() => {
+    if (isMouseInPopup) return;
+
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+
+    hideTimeoutRef.current = setTimeout(() => {
+      if (!isMouseInPopup) {
+        setActiveFeature(null);
+        setPopupPosition(null);
+      }
+      hideTimeoutRef.current = null;
+    }, POPUP_HIDE_DELAY);
+  }, [isMouseInPopup]);
+
   // Hide popup immediately
   const hidePopup = useCallback(() => {
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
     }
-    setActiveConstruction(null);
+    setActiveFeature(null);
     setPopupPosition(null);
     setIsMouseInPopup(false);
   }, []);
 
-  // Compute visible constructions
-  const computeVisibleConstructions = useCallback(() => {
+  // Compute visible features
+  const computeVisibleFeatures = useCallback(() => {
     if (!mapRef.current || features.length === 0) return;
 
     const bounds = mapRef.current.getBounds();
@@ -548,13 +433,14 @@ export function GoogleConstructionMap({
           feature,
           visibleTypes,
           visibleStatuses,
-          visibleCategories
+          visibleSourceCollections,
+          visibleDevelopmentTypes
         ) && isGeometryInBounds(feature.geometry, bounds)
       )
       .map((f) => f.properties);
 
-    setVisibleConstructions(visible);
-  }, [features, visibleTypes, visibleStatuses, visibleCategories]);
+    setVisibleFeatures(visible);
+  }, [features, visibleTypes, visibleStatuses, visibleSourceCollections, visibleDevelopmentTypes]);
 
   // Handle map bounds change (debounced)
   const handleBoundsChanged = useCallback(() => {
@@ -562,9 +448,19 @@ export function GoogleConstructionMap({
       clearTimeout(viewportTimeoutRef.current);
     }
     viewportTimeoutRef.current = setTimeout(() => {
-      computeVisibleConstructions();
+      computeVisibleFeatures();
     }, VIEWPORT_UPDATE_DELAY);
-  }, [computeVisibleConstructions]);
+  }, [computeVisibleFeatures]);
+
+  // Handle zoom change for detail marker visibility
+  const handleZoomChanged = useCallback(() => {
+    if (mapRef.current) {
+      const zoom = mapRef.current.getZoom();
+      if (zoom !== undefined) {
+        setCurrentZoom(zoom);
+      }
+    }
+  }, []);
 
   // Map load handler
   const handleMapLoad = useCallback((map: google.maps.Map) => {
@@ -575,23 +471,9 @@ export function GoogleConstructionMap({
       styles: theme === 'dark' ? GOOGLE_MAP_DARK_STYLE : GOOGLE_MAP_LIGHT_STYLE,
     });
 
-    // Add click listener to close popup when clicking on empty map area
-    map.addListener('click', () => {
-      // Only close if not clicking on a feature (handled separately)
-      if (!isMouseInPopupRef.current) {
-        setActiveConstruction(null);
-        setPopupPosition(null);
-        setIsMouseInPopup(false);
-        if (hideTimeoutRef.current) {
-          clearTimeout(hideTimeoutRef.current);
-          hideTimeoutRef.current = null;
-        }
-      }
-    });
-
-    // Initial computation of visible constructions
-    setTimeout(computeVisibleConstructions, 100);
-  }, [theme, computeVisibleConstructions]);
+    // Initial computation of visible features
+    setTimeout(computeVisibleFeatures, 100);
+  }, [theme, computeVisibleFeatures]);
 
   // Filter toggle handlers
   const handleTypeToggle = useCallback((type: string) => {
@@ -618,13 +500,25 @@ export function GoogleConstructionMap({
     });
   }, []);
 
-  const handleCategoryToggle = useCallback((category: string) => {
-    setVisibleCategories((prev) => {
+  const handleSourceCollectionToggle = useCallback((source: string) => {
+    setVisibleSourceCollections((prev) => {
       const next = new Set(prev);
-      if (next.has(category)) {
-        next.delete(category);
+      if (next.has(source)) {
+        next.delete(source);
       } else {
-        next.add(category);
+        next.add(source);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleDevelopmentTypeToggle = useCallback((type: string) => {
+    setVisibleDevelopmentTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) {
+        next.delete(type);
+      } else {
+        next.add(type);
       }
       return next;
     });
@@ -646,26 +540,34 @@ export function GoogleConstructionMap({
     );
   }, []);
 
-  const handleToggleAllCategories = useCallback(() => {
-    setVisibleCategories((prev) =>
-      prev.size === Object.keys(CATEGORY_COLORS).length
+  const handleToggleAllSourceCollections = useCallback(() => {
+    setVisibleSourceCollections((prev) =>
+      prev.size === Object.keys(SOURCE_COLLECTION_COLORS).length
         ? new Set<string>()
-        : new Set(Object.keys(CATEGORY_COLORS))
+        : new Set(Object.keys(SOURCE_COLLECTION_COLORS))
     );
   }, []);
 
-  // Handle selecting construction from list
+  const handleToggleAllDevelopmentTypes = useCallback(() => {
+    setVisibleDevelopmentTypes((prev) =>
+      prev.size === Object.keys(DEVELOPMENT_TYPE_COLORS).length
+        ? new Set<string>()
+        : new Set(Object.keys(DEVELOPMENT_TYPE_COLORS))
+    );
+  }, []);
+
+  // Handle selecting feature from list
   const handleSelectFromList = useCallback(
-    (construction: Construction) => {
-      const feature = features.find((f) => f.id === construction.id);
+    (mapFeature: MapFeature) => {
+      const feature = features.find((f) => f.id === mapFeature.id);
       if (feature && mapRef.current) {
         mapRef.current.panTo(feature.center);
         mapRef.current.setZoom(14);
-        setActiveConstruction(construction);
+        setActiveFeature(mapFeature);
         setPopupPosition(feature.center);
       }
       setIsListModalOpen(false);
-      onSelectConstruction?.(construction.id);
+      onSelectConstruction?.(mapFeature.id);
     },
     [features, onSelectConstruction]
   );
@@ -673,7 +575,6 @@ export function GoogleConstructionMap({
   // Handle popup mouse events
   const handlePopupMouseEnter = useCallback(() => {
     setIsMouseInPopup(true);
-    isMouseInPopupRef.current = true;
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
@@ -682,7 +583,6 @@ export function GoogleConstructionMap({
 
   const handlePopupMouseLeave = useCallback(() => {
     setIsMouseInPopup(false);
-    isMouseInPopupRef.current = false;
     scheduleHidePopup();
   }, [scheduleHidePopup]);
 
@@ -724,12 +624,13 @@ export function GoogleConstructionMap({
         zoom={initialZoom}
         onLoad={handleMapLoad}
         onBoundsChanged={handleBoundsChanged}
+        onZoomChanged={handleZoomChanged}
         options={DEFAULT_MAP_OPTIONS}
       >
         {/* InfoWindow popup */}
-        {activeConstruction && popupPosition && (
+        {activeFeature && popupPosition && (
           <GoogleMapInfoWindow
-            construction={activeConstruction}
+            feature={activeFeature}
             position={popupPosition}
             onClose={hidePopup}
             onMouseEnter={handlePopupMouseEnter}
@@ -738,7 +639,7 @@ export function GoogleConstructionMap({
         )}
       </GoogleMap>
 
-      {/* Construction list toggle button */}
+      {/* Feature list toggle button */}
       <button
         onClick={() => setIsListModalOpen(true)}
         className="absolute bottom-24 right-4 z-10 flex items-center gap-2 px-3 py-2 bg-card shadow-lg rounded-lg hover:bg-muted transition-colors"
@@ -756,28 +657,31 @@ export function GoogleConstructionMap({
             d="M4 6h16M4 10h16M4 14h16M4 18h16"
           />
         </svg>
-        <span className="text-sm font-medium">{visibleConstructions.length}</span>
+        <span className="text-sm font-medium">{visibleFeatures.length}</span>
       </button>
 
-      {/* Construction list modal */}
+      {/* Feature list modal */}
       <GoogleConstructionListModal
         isOpen={isListModalOpen}
         onClose={() => setIsListModalOpen(false)}
-        constructions={visibleConstructions}
-        onSelectConstruction={handleSelectFromList}
+        features={visibleFeatures}
+        onSelectFeature={handleSelectFromList}
       />
 
       {/* Legend with filter toggles */}
       <GoogleMapLegend
         visibleTypes={visibleTypes}
         visibleStatuses={visibleStatuses}
-        visibleCategories={visibleCategories}
+        visibleSourceCollections={visibleSourceCollections}
+        visibleDevelopmentTypes={visibleDevelopmentTypes}
         onTypeToggle={handleTypeToggle}
         onStatusToggle={handleStatusToggle}
-        onCategoryToggle={handleCategoryToggle}
+        onSourceCollectionToggle={handleSourceCollectionToggle}
+        onDevelopmentTypeToggle={handleDevelopmentTypeToggle}
         onToggleAllTypes={handleToggleAllTypes}
         onToggleAllStatuses={handleToggleAllStatuses}
-        onToggleAllCategories={handleToggleAllCategories}
+        onToggleAllSourceCollections={handleToggleAllSourceCollections}
+        onToggleAllDevelopmentTypes={handleToggleAllDevelopmentTypes}
       />
 
       {/* City selection modal */}

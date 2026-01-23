@@ -94,22 +94,33 @@ export function getTypeShortLabel(type: string): string {
 
 /**
  * Separate GeoJSON features by geometry type
+ * Also separates detail markers (metro stations, freeway exits) from regular points
  */
 export function separateFeaturesByGeometry(features: GeoJSON.Feature[]): {
   points: GeoJSON.Feature[];
   lines: GeoJSON.Feature[];
   polygons: GeoJSON.Feature[];
+  detailMarkers: GeoJSON.Feature[];
 } {
   const points: GeoJSON.Feature[] = [];
   const lines: GeoJSON.Feature[] = [];
   const polygons: GeoJSON.Feature[] = [];
+  const detailMarkers: GeoJSON.Feature[] = [];
 
   for (const feature of features) {
     if (!feature.geometry) continue;
+
+    // Check if this is a detail marker (metro station or freeway exit)
+    const isDetailMarker = feature.properties?.isDetailMarker === true;
+
     switch (feature.geometry.type) {
       case 'Point':
       case 'MultiPoint':
-        points.push(feature);
+        if (isDetailMarker) {
+          detailMarkers.push(feature);
+        } else {
+          points.push(feature);
+        }
         break;
       case 'LineString':
       case 'MultiLineString':
@@ -122,7 +133,7 @@ export function separateFeaturesByGeometry(features: GeoJSON.Feature[]): {
     }
   }
 
-  return { points, lines, polygons };
+  return { points, lines, polygons, detailMarkers };
 }
 
 /**

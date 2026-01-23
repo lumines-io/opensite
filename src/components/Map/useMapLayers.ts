@@ -7,6 +7,7 @@ import {
   LAYER_IDS,
   CLUSTER_CONFIG,
   PULSE_CONFIG,
+  ZOOM_LEVELS,
 } from './construction-map.constants';
 import {
   separateFeaturesByGeometry,
@@ -134,8 +135,8 @@ export function useMapLayers({ mapRef, loaded, geojsonData, styleLoaded, filters
     const map = mapRef.current?.getMap();
     if (!map || !loaded || !geojsonData) return;
 
-    // Separate features by geometry type
-    const { points, lines, polygons } = separateFeaturesByGeometry(geojsonData.features);
+    // Separate features by geometry type (includes detail markers)
+    const { points, lines, polygons, detailMarkers } = separateFeaturesByGeometry(geojsonData.features);
 
     // Build expressions
     const typeColorExpr = buildTypeColorExpression();
@@ -167,6 +168,13 @@ export function useMapLayers({ mapRef, loaded, geojsonData, styleLoaded, filters
       map,
       SOURCE_IDS.LINES,
       { type: 'FeatureCollection', features: lines }
+    );
+
+    // Add detail markers source (metro stations, freeway exits)
+    addOrUpdateSource(
+      map,
+      SOURCE_IDS.DETAIL_MARKERS,
+      { type: 'FeatureCollection', features: detailMarkers }
     );
 
     // === PULSE LAYERS (added first, below main layers) ===
@@ -368,6 +376,86 @@ export function useMapLayers({ mapRef, loaded, geojsonData, styleLoaded, filters
       },
     });
 
+    // === DETAIL MARKERS (metro stations, freeway exits) ===
+    // These only appear at higher zoom levels
+
+    // Detail markers pulse layer (subtle outer glow)
+    addLayerIfNotExists(map, {
+      id: LAYER_IDS.DETAIL_MARKERS_PULSE,
+      type: 'circle',
+      source: SOURCE_IDS.DETAIL_MARKERS,
+      minzoom: ZOOM_LEVELS.SHOW_DETAIL_MARKERS,
+      paint: {
+        'circle-color': typeColorExpr,
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          ZOOM_LEVELS.SHOW_DETAIL_MARKERS, 8,
+          ZOOM_LEVELS.MAX_SCALE, 12,
+        ],
+        'circle-opacity': 0.3,
+        'circle-stroke-width': 0,
+      },
+    });
+
+    // Detail markers main layer (smaller circle markers)
+    addLayerIfNotExists(map, {
+      id: LAYER_IDS.DETAIL_MARKERS,
+      type: 'circle',
+      source: SOURCE_IDS.DETAIL_MARKERS,
+      minzoom: ZOOM_LEVELS.SHOW_DETAIL_MARKERS,
+      paint: {
+        'circle-color': typeColorExpr,
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          ZOOM_LEVELS.SHOW_DETAIL_MARKERS, 5,
+          ZOOM_LEVELS.MAX_SCALE, 8,
+        ],
+        'circle-stroke-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          ZOOM_LEVELS.SHOW_DETAIL_MARKERS, 1.5,
+          ZOOM_LEVELS.MAX_SCALE, 2.5,
+        ],
+        'circle-stroke-color': '#ffffff',
+        'circle-opacity': 1,
+      },
+    });
+
+    // Detail markers labels (show station/exit names at higher zoom)
+    addLayerIfNotExists(map, {
+      id: LAYER_IDS.DETAIL_MARKERS_LABELS,
+      type: 'symbol',
+      source: SOURCE_IDS.DETAIL_MARKERS,
+      minzoom: 14, // Show labels only at very high zoom
+      layout: {
+        'text-field': ['get', 'title'],
+        'text-size': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          14, 10,
+          16, 12,
+        ],
+        'text-font': ['DIN Pro Medium', 'Arial Unicode MS Bold'],
+        'text-anchor': 'top',
+        'text-offset': [0, 0.8],
+        'text-max-width': 8,
+        'text-allow-overlap': false,
+        'text-ignore-placement': false,
+      },
+      paint: {
+        'text-color': '#374151',
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 1.5,
+        'text-halo-blur': 0.5,
+      },
+    });
+
     // Start pulse animation
     animatePulse(map);
 
@@ -390,8 +478,11 @@ export function useMapLayers({ mapRef, loaded, geojsonData, styleLoaded, filters
         LAYER_IDS.POLYGON_OUTLINES,
         LAYER_IDS.POLYGONS,
         LAYER_IDS.POLYGONS_PULSE,
+        LAYER_IDS.DETAIL_MARKERS,
+        LAYER_IDS.DETAIL_MARKERS_PULSE,
+        LAYER_IDS.DETAIL_MARKERS_LABELS,
       ];
-      const sourceIds = [SOURCE_IDS.POINTS, SOURCE_IDS.LINES, SOURCE_IDS.POLYGONS];
+      const sourceIds = [SOURCE_IDS.POINTS, SOURCE_IDS.LINES, SOURCE_IDS.POLYGONS, SOURCE_IDS.DETAIL_MARKERS];
 
       for (const id of layerIds) {
         if (map.getLayer(id)) map.removeLayer(id);

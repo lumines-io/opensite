@@ -18,6 +18,7 @@ assertValidEnvironment();
 import { Users } from './collections/Users';
 import { Organizations } from './collections/Organizations';
 import { Constructions } from './collections/Constructions';
+import { Developments } from './collections/Developments';
 import { ConstructionChangelog } from './collections/ConstructionChangelog';
 import { Suggestions } from './collections/Suggestions';
 import { Media } from './collections/Media';
@@ -165,6 +166,7 @@ export default buildConfig({
     Users,
     Organizations,
     Constructions,
+    Developments,
     ConstructionChangelog,
     Suggestions,
     Media,

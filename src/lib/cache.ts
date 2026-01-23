@@ -15,6 +15,7 @@ export const CACHE_TTL = {
 export const CACHE_KEYS = {
   MAP_DATA: 'cache:map:constructions',
   CONSTRUCTION: 'cache:construction:',
+  DEVELOPMENT: 'cache:development:',
   SEARCH: 'cache:search:',
   NEARBY: 'cache:nearby:',
   STATS: 'cache:stats',
@@ -173,6 +174,11 @@ export function getConstructionCacheKey(slug: string): string {
   return `${CACHE_KEYS.CONSTRUCTION}${slug}`;
 }
 
+// Generate cache key for development details
+export function getDevelopmentCacheKey(slug: string): string {
+  return `${CACHE_KEYS.DEVELOPMENT}${slug}`;
+}
+
 // Cache invalidation helpers for PayloadCMS hooks
 export async function invalidateConstructionCache(slug?: string): Promise<void> {
   const redis = getRedisClient();
@@ -198,6 +204,34 @@ export async function invalidateConstructionCache(slug?: string): Promise<void> 
     cacheLogger.info('Invalidated construction caches', { slug: slug || 'all' });
   } catch (error) {
     cacheLogger.error('Error invalidating construction cache', error instanceof Error ? error : String(error), { slug });
+  }
+}
+
+// Cache invalidation for Developments collection
+export async function invalidateDevelopmentCache(slug?: string): Promise<void> {
+  const redis = getRedisClient();
+  if (!redis) {
+    return;
+  }
+
+  try {
+    // Always invalidate the map data cache when any development changes
+    await deleteFromCache(CACHE_KEYS.MAP_DATA);
+
+    // Invalidate specific development cache if slug provided
+    if (slug) {
+      await deleteFromCache(getDevelopmentCacheKey(slug));
+    }
+
+    // Invalidate nearby search caches (all of them since geometry might have changed)
+    await invalidateCachePattern(`${CACHE_KEYS.NEARBY}*`);
+
+    // Invalidate search results (development might appear in searches)
+    await invalidateCachePattern(`${CACHE_KEYS.SEARCH}*`);
+
+    cacheLogger.info('Invalidated development caches', { slug: slug || 'all' });
+  } catch (error) {
+    cacheLogger.error('Error invalidating development cache', error instanceof Error ? error : String(error), { slug });
   }
 }
 

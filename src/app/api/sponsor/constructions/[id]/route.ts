@@ -43,7 +43,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const construction = await payload.findByID({
       collection: 'constructions',
       id,
-      depth: 2, // Include related data like district, organization, users
+      depth: 2, // Include related data
     });
 
     if (!construction) {

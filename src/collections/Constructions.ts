@@ -1,4 +1,4 @@
-import type { CollectionConfig, Where } from 'payload';
+import type { CollectionConfig } from 'payload';
 import { invalidateConstructionCache } from '@/lib/cache';
 import { cacheLogger } from '@/lib/persistent-logger';
 import {
@@ -21,91 +21,33 @@ export const Constructions: CollectionConfig = {
   slug: 'constructions',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'constructionType', 'status', 'progress', 'updatedAt'],
+    defaultColumns: ['title', 'constructionType', 'constructionStatus', 'progress', 'updatedAt'],
     group: 'Content',
+    description: 'Public infrastructure projects (roads, highways, metro, bridges, etc.)',
   },
   access: {
-    // Read access:
-    // - Public constructions: anyone can read
-    // - Private constructions:
-    //   - Published: anyone can read
-    //   - Non-published: only admin, moderator, or sponsor users from same org
-    read: ({ req }): boolean | Where => {
+    // Read access: anyone can read published constructions
+    read: ({ req }) => {
       // Admins and moderators can read everything
       if (['admin', 'moderator'].includes(req.user?.role as string)) {
         return true;
       }
-
-      // Sponsor users can read their org's private constructions + all public
-      if (['sponsor_admin', 'sponsor_user'].includes(req.user?.role as string) && req.user?.organization) {
-        return {
-          or: [
-            // All public constructions
-            { constructionCategory: { equals: 'public' } },
-            // Published private constructions
-            {
-              and: [
-                { constructionCategory: { equals: 'private' } },
-                { approvalStatus: { equals: 'published' } },
-              ],
-            },
-            // Their own org's private constructions (any status)
-            {
-              and: [
-                { constructionCategory: { equals: 'private' } },
-                { organization: { equals: req.user.organization } },
-              ],
-            },
-          ],
-        };
-      }
-
-      // Public: can read all public constructions + published private
+      // Public: can read only published constructions
       return {
-        or: [
-          { constructionCategory: { equals: 'public' } },
-          {
-            and: [
-              { constructionCategory: { equals: 'private' } },
-              { approvalStatus: { equals: 'published' } },
-            ],
-          },
-        ],
+        _status: { equals: 'published' },
       };
     },
 
-    // Create access:
-    // - Public constructions: only admin/moderator (contributors suggest via Suggestions)
-    // - Private constructions: admin/moderator/sponsor_admin/sponsor_user
+    // Create access: only admin/moderator (contributors suggest via Suggestions)
     create: ({ req }) => {
       if (!req.user?._verified) return false;
-      // Admin and moderator can create any construction type
-      if (['admin', 'moderator'].includes(req.user?.role as string)) return true;
-      // Sponsor users can create (will be restricted to private via hooks)
-      if (['sponsor_admin', 'sponsor_user'].includes(req.user?.role as string)) return true;
-      return false;
+      return ['admin', 'moderator'].includes(req.user?.role as string);
     },
 
-    // Update access:
-    // - Public constructions: only admin/moderator
-    // - Private constructions: admin/moderator OR sponsor users from same org
-    update: ({ req }): boolean | Where => {
+    // Update access: only admin/moderator
+    update: ({ req }) => {
       if (!req.user?._verified) return false;
-
-      // Admin and moderator can update any construction
-      if (['admin', 'moderator'].includes(req.user?.role as string)) return true;
-
-      // Sponsor users can only update their org's private constructions
-      if (['sponsor_admin', 'sponsor_user'].includes(req.user?.role as string) && req.user?.organization) {
-        return {
-          and: [
-            { constructionCategory: { equals: 'private' } },
-            { organization: { equals: req.user.organization } },
-          ],
-        };
-      }
-
-      return false;
+      return ['admin', 'moderator'].includes(req.user?.role as string);
     },
 
     // Delete access: only admin
@@ -119,24 +61,8 @@ export const Constructions: CollectionConfig = {
   },
   fields: [
     // ============================================
-    // CONSTRUCTION CATEGORY (Public vs Private)
+    // BASIC INFORMATION
     // ============================================
-    {
-      name: 'constructionCategory',
-      type: 'select',
-      required: true,
-      defaultValue: 'public',
-      options: [
-        { label: 'Public Infrastructure', value: 'public' },
-        { label: 'Private Development', value: 'private' },
-      ],
-      admin: {
-        position: 'sidebar',
-        description: 'Public = government infrastructure; Private = commercial/real estate',
-      },
-    },
-
-    // Basic Info
     {
       name: 'title',
       type: 'text',
@@ -210,10 +136,13 @@ export const Constructions: CollectionConfig = {
       },
     },
 
-    // Type & Status (for Public constructions)
+    // ============================================
+    // CONSTRUCTION TYPE
+    // ============================================
     {
       name: 'constructionType',
       type: 'select',
+      required: true,
       defaultValue: 'road',
       options: [
         { label: 'Road Construction', value: 'road' },
@@ -227,64 +156,12 @@ export const Constructions: CollectionConfig = {
       ],
       admin: {
         position: 'sidebar',
-        condition: (data) => data?.constructionCategory === 'public',
       },
     },
 
-    // Private Construction Type (for Private constructions)
-    {
-      name: 'privateType',
-      type: 'select',
-      options: [
-        { label: 'Residential', value: 'residential' },
-        { label: 'Commercial', value: 'commercial' },
-        { label: 'Office', value: 'office' },
-        { label: 'Mixed-Use', value: 'mixed_use' },
-        { label: 'Industrial', value: 'industrial' },
-        { label: 'Hospitality', value: 'hospitality' },
-        { label: 'Retail', value: 'retail' },
-        { label: 'Healthcare', value: 'healthcare' },
-        { label: 'Educational', value: 'educational' },
-        { label: 'Other', value: 'other' },
-      ],
-      admin: {
-        position: 'sidebar',
-        condition: (data) => data?.constructionCategory === 'private',
-      },
-    },
-
-    // Organization (owner of private construction)
-    {
-      name: 'organization',
-      type: 'relationship',
-      relationTo: 'organizations',
-      admin: {
-        position: 'sidebar',
-        condition: (data) => data?.constructionCategory === 'private',
-        description: 'Organization that owns this private construction',
-      },
-    },
-
-    // Approval Status (for Private constructions)
-    {
-      name: 'approvalStatus',
-      type: 'select',
-      defaultValue: 'draft',
-      options: [
-        { label: 'Draft', value: 'draft' },
-        { label: 'Pending Internal Review', value: 'internal_review' },
-        { label: 'Submitted for Approval', value: 'submitted' },
-        { label: 'Under Review', value: 'under_review' },
-        { label: 'Changes Requested', value: 'changes_requested' },
-        { label: 'Approved', value: 'approved' },
-        { label: 'Rejected', value: 'rejected' },
-        { label: 'Published', value: 'published' },
-      ],
-      admin: {
-        position: 'sidebar',
-        condition: (data) => data?.constructionCategory === 'private',
-      },
-    },
+    // ============================================
+    // STATUS & PROGRESS
+    // ============================================
     {
       name: 'constructionStatus',
       type: 'select',
@@ -313,7 +190,9 @@ export const Constructions: CollectionConfig = {
       },
     },
 
-    // Geometry
+    // ============================================
+    // GEOMETRY & LOCATION
+    // ============================================
     {
       name: 'geometry',
       type: 'json',
@@ -332,7 +211,9 @@ export const Constructions: CollectionConfig = {
       },
     },
 
-    // Timeline
+    // ============================================
+    // TIMELINE
+    // ============================================
     {
       type: 'row',
       fields: [
@@ -363,7 +244,9 @@ export const Constructions: CollectionConfig = {
       ],
     },
 
-    // Details
+    // ============================================
+    // PROJECT DETAILS
+    // ============================================
     {
       name: 'details',
       type: 'group',
@@ -383,16 +266,128 @@ export const Constructions: CollectionConfig = {
           type: 'text',
           label: 'Funding Source',
         },
+        {
+          name: 'length',
+          type: 'number',
+          label: 'Length (km)',
+          admin: {
+            description: 'Total length for roads, highways, metro lines',
+          },
+        },
+        {
+          name: 'width',
+          type: 'number',
+          label: 'Width (m)',
+          admin: {
+            description: 'Road width or bridge width',
+          },
+        },
+        {
+          name: 'lanes',
+          type: 'number',
+          label: 'Number of Lanes',
+        },
       ],
     },
 
-    // Metro stations (only for metro type)
+    // ============================================
+    // DETAIL POINTS (Stations, Exits, etc.)
+    // ============================================
+    {
+      name: 'detailPoints',
+      type: 'array',
+      admin: {
+        description: 'Points of interest along the construction (e.g., metro stations, freeway exits, bridge sections)',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+          localized: true,
+          admin: {
+            description: 'Name of the point (e.g., "Ga Bến Thành", "Nút giao An Phú")',
+          },
+        },
+        {
+          name: 'location',
+          type: 'json',
+          admin: {
+            description: 'GeoJSON Point [longitude, latitude]',
+          },
+        },
+        {
+          name: 'order',
+          type: 'number',
+          admin: {
+            description: 'Order along the construction (for sorting)',
+          },
+        },
+        {
+          name: 'pointType',
+          type: 'select',
+          options: [
+            // Metro/Transit
+            { label: 'Station', value: 'station' },
+            { label: 'Depot', value: 'depot' },
+            { label: 'Transfer Point', value: 'transfer' },
+            // Highway/Road
+            { label: 'Entry/Exit', value: 'exit' },
+            { label: 'Interchange', value: 'interchange' },
+            { label: 'Toll Plaza', value: 'toll' },
+            { label: 'Rest Area', value: 'rest_area' },
+            // Bridge/Tunnel
+            { label: 'Bridge Section', value: 'bridge_section' },
+            { label: 'Tunnel Portal', value: 'tunnel_portal' },
+            // General
+            { label: 'Milestone', value: 'milestone' },
+            { label: 'Other', value: 'other' },
+          ],
+          defaultValue: 'other',
+        },
+        {
+          name: 'status',
+          type: 'select',
+          options: [
+            { label: 'Planned', value: 'planned' },
+            { label: 'Under Construction', value: 'in-progress' },
+            { label: 'Completed', value: 'completed' },
+            { label: 'Operational', value: 'operational' },
+          ],
+          defaultValue: 'planned',
+        },
+        {
+          name: 'progress',
+          type: 'number',
+          min: 0,
+          max: 100,
+          defaultValue: 0,
+        },
+        {
+          name: 'description',
+          type: 'text',
+          localized: true,
+          admin: {
+            description: 'Additional details (e.g., connected roads, facilities)',
+          },
+        },
+        {
+          name: 'openedAt',
+          type: 'date',
+          admin: {
+            description: 'Date when this point became operational',
+          },
+        },
+      ],
+    },
+
+    // Legacy: Metro stations (kept for backward compatibility)
     {
       name: 'metroStations',
       type: 'array',
       admin: {
         condition: (data) => data?.constructionType === 'metro',
-        description: 'Stations along the metro line',
+        description: '(Legacy) Use detailPoints instead. Stations along the metro line.',
       },
       fields: [
         {
@@ -405,7 +400,7 @@ export const Constructions: CollectionConfig = {
           name: 'location',
           type: 'json',
           admin: {
-            description: 'GeoJSON Point',
+            description: 'GeoJSON Point [longitude, latitude]',
           },
         },
         {
@@ -437,7 +432,9 @@ export const Constructions: CollectionConfig = {
       ],
     },
 
-    // Media
+    // ============================================
+    // MEDIA
+    // ============================================
     {
       name: 'images',
       type: 'array',
@@ -459,7 +456,9 @@ export const Constructions: CollectionConfig = {
       ],
     },
 
-    // Sources
+    // ============================================
+    // SOURCES
+    // ============================================
     {
       name: 'sources',
       type: 'array',
@@ -481,7 +480,9 @@ export const Constructions: CollectionConfig = {
       ],
     },
 
-    // Version tracking
+    // ============================================
+    // VERSION TRACKING
+    // ============================================
     {
       name: 'currentVersion',
       type: 'number',
@@ -491,363 +492,20 @@ export const Constructions: CollectionConfig = {
         readOnly: true,
       },
     },
-
-    // ============================================
-    // PRIVATE CONSTRUCTION FIELDS
-    // ============================================
-
-    // Marketing Content (Private only)
-    {
-      name: 'marketing',
-      type: 'group',
-      admin: {
-        condition: (data) => data?.constructionCategory === 'private',
-        description: 'Marketing content for private developments',
-      },
-      fields: [
-        {
-          name: 'headline',
-          type: 'text',
-          localized: true,
-          maxLength: 100,
-          admin: {
-            description: 'Marketing tagline (e.g., "Luxury Living in District 2")',
-          },
-        },
-        {
-          name: 'keyFeatures',
-          type: 'array',
-          maxRows: 6,
-          fields: [
-            {
-              name: 'feature',
-              type: 'text',
-              localized: true,
-            },
-            {
-              name: 'icon',
-              type: 'select',
-              options: [
-                { label: 'Location', value: 'location' },
-                { label: 'Price', value: 'price' },
-                { label: 'Size', value: 'size' },
-                { label: 'Amenities', value: 'amenities' },
-                { label: 'View', value: 'view' },
-                { label: 'Security', value: 'security' },
-                { label: 'Parking', value: 'parking' },
-                { label: 'Pool', value: 'pool' },
-                { label: 'Gym', value: 'gym' },
-                { label: 'Garden', value: 'garden' },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'priceRange',
-          type: 'group',
-          fields: [
-            {
-              name: 'min',
-              type: 'number',
-              admin: { description: 'Minimum price (VND)' },
-            },
-            {
-              name: 'max',
-              type: 'number',
-              admin: { description: 'Maximum price (VND)' },
-            },
-            {
-              name: 'pricePerSqm',
-              type: 'number',
-              admin: { description: 'Price per square meter (VND)' },
-            },
-            {
-              name: 'displayText',
-              type: 'text',
-              localized: true,
-              admin: { description: 'Custom price display text' },
-            },
-          ],
-        },
-        {
-          name: 'videoUrl',
-          type: 'text',
-          admin: { description: 'YouTube or Vimeo URL' },
-        },
-        {
-          name: 'virtualTourUrl',
-          type: 'text',
-          admin: { description: '360° tour URL' },
-        },
-        {
-          name: 'brochure',
-          type: 'upload',
-          relationTo: 'media',
-          admin: { description: 'PDF brochure for download' },
-        },
-      ],
-    },
-
-    // Call to Action (Private only)
-    {
-      name: 'cta',
-      type: 'group',
-      admin: {
-        condition: (data) => data?.constructionCategory === 'private',
-        description: 'Call-to-action configuration',
-      },
-      fields: [
-        {
-          name: 'primaryButton',
-          type: 'group',
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-              localized: true,
-              defaultValue: 'Contact Sales',
-            },
-            {
-              name: 'url',
-              type: 'text',
-              admin: { description: 'External URL (optional)' },
-            },
-            {
-              name: 'action',
-              type: 'select',
-              defaultValue: 'phone',
-              options: [
-                { label: 'External Link', value: 'link' },
-                { label: 'Show Contact Form', value: 'form' },
-                { label: 'Show Phone Number', value: 'phone' },
-                { label: 'Download Brochure', value: 'download' },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'contactPhone',
-          type: 'text',
-          admin: { description: 'Sales hotline' },
-        },
-        {
-          name: 'contactEmail',
-          type: 'email',
-          admin: { description: 'Sales email' },
-        },
-        {
-          name: 'salesOffice',
-          type: 'textarea',
-          localized: true,
-          admin: { description: 'Sales office address' },
-        },
-      ],
-    },
-
-    // Display Options (Private only)
-    {
-      name: 'displayOptions',
-      type: 'group',
-      admin: {
-        condition: (data) => data?.constructionCategory === 'private',
-        description: 'Map display settings',
-      },
-      fields: [
-        {
-          name: 'featured',
-          type: 'checkbox',
-          defaultValue: false,
-          admin: { description: 'Show in featured section' },
-        },
-        {
-          name: 'priority',
-          type: 'number',
-          defaultValue: 0,
-          admin: { description: 'Higher priority = more prominent placement' },
-        },
-        {
-          name: 'showSponsoredBadge',
-          type: 'checkbox',
-          defaultValue: true,
-          admin: { description: 'Show "Sponsored" badge on map' },
-        },
-        {
-          name: 'useCustomMarker',
-          type: 'checkbox',
-          defaultValue: false,
-          admin: { description: 'Use organization brand color for marker' },
-        },
-      ],
-    },
-
-    // Active Promotion (Private only)
-    {
-      name: 'activePromotion',
-      type: 'relationship',
-      relationTo: 'promotions',
-      admin: {
-        readOnly: true,
-        condition: (data) => data?.constructionCategory === 'private',
-        description: 'Currently active promotion for this construction',
-      },
-    },
-    {
-      name: 'promotionExpiresAt',
-      type: 'date',
-      admin: {
-        readOnly: true,
-        condition: (data) => data?.constructionCategory === 'private',
-        description: 'When the current promotion expires',
-      },
-    },
-
-    // Review Metadata (Private only)
-    {
-      name: 'review',
-      type: 'group',
-      admin: {
-        condition: (data) =>
-          data?.constructionCategory === 'private' && data?.approvalStatus !== 'draft',
-        description: 'Approval workflow metadata',
-      },
-      fields: [
-        {
-          name: 'submittedAt',
-          type: 'date',
-          admin: { readOnly: true },
-        },
-        {
-          name: 'submittedBy',
-          type: 'relationship',
-          relationTo: 'users',
-          admin: { readOnly: true },
-        },
-        {
-          name: 'reviewedAt',
-          type: 'date',
-          admin: { readOnly: true },
-        },
-        {
-          name: 'reviewedBy',
-          type: 'relationship',
-          relationTo: 'users',
-          admin: { readOnly: true },
-        },
-        {
-          name: 'reviewNotes',
-          type: 'textarea',
-          admin: { description: 'Notes from reviewer (visible to sponsor)' },
-        },
-        {
-          name: 'internalNotes',
-          type: 'textarea',
-          admin: { description: 'Internal notes (not visible to sponsor)' },
-        },
-      ],
-    },
-
-    // Analytics (Private only, read-only)
-    {
-      name: 'analytics',
-      type: 'group',
-      admin: {
-        condition: (data) => data?.constructionCategory === 'private',
-        readOnly: true,
-        description: 'Engagement metrics (updated automatically)',
-      },
-      fields: [
-        {
-          name: 'impressions',
-          type: 'number',
-          defaultValue: 0,
-          admin: { description: 'Number of times shown on map' },
-        },
-        {
-          name: 'clicks',
-          type: 'number',
-          defaultValue: 0,
-          admin: { description: 'Number of popup opens' },
-        },
-        {
-          name: 'ctaClicks',
-          type: 'number',
-          defaultValue: 0,
-          admin: { description: 'Number of CTA button clicks' },
-        },
-        {
-          name: 'inquiries',
-          type: 'number',
-          defaultValue: 0,
-          admin: { description: 'Number of form submissions' },
-        },
-      ],
-    },
   ],
   hooks: {
     beforeChange: [
-      async ({ data, originalDoc, operation, req }) => {
+      async ({ data, originalDoc, operation }) => {
         // Version tracking
         if (operation === 'update' && originalDoc) {
           data.currentVersion = (originalDoc.currentVersion || 0) + 1;
         }
-
-        const userRole = req.user?.role as string;
-        const isSponsorRole = ['sponsor_admin', 'sponsor_user'].includes(userRole);
-
-        // Sponsor users can only create private constructions
-        if (operation === 'create' && isSponsorRole) {
-          data.constructionCategory = 'private';
-          // Auto-set organization to user's organization
-          if (req.user?.organization && !data.organization) {
-            data.organization = req.user.organization;
-          }
-          // Set initial approval status
-          if (!data.approvalStatus) {
-            data.approvalStatus = 'draft';
-          }
-        }
-
-        // Sponsor users cannot change category to public
-        if (operation === 'update' && isSponsorRole && data.constructionCategory === 'public') {
-          data.constructionCategory = 'private';
-        }
-
-        // Sponsor users cannot change approval status to approved/published
-        // Only admin/moderator can approve
-        if (isSponsorRole && ['approved', 'published'].includes(data.approvalStatus)) {
-          // Keep the original status or set to submitted if trying to self-approve
-          if (originalDoc?.approvalStatus) {
-            data.approvalStatus = originalDoc.approvalStatus;
-          } else {
-            data.approvalStatus = 'submitted';
-          }
-        }
-
-        // Track submission for approval workflow
-        if (data.approvalStatus === 'submitted' && originalDoc?.approvalStatus !== 'submitted') {
-          data.review = data.review || {};
-          data.review.submittedAt = new Date().toISOString();
-          data.review.submittedBy = req.user?.id;
-        }
-
-        // Track review completion (by admin/moderator)
-        const isReviewRole = ['admin', 'moderator'].includes(userRole);
-        const statusChanged = data.approvalStatus !== originalDoc?.approvalStatus;
-        const isReviewedStatus = ['approved', 'rejected', 'changes_requested'].includes(data.approvalStatus);
-
-        if (isReviewRole && statusChanged && isReviewedStatus) {
-          data.review = data.review || {};
-          data.review.reviewedAt = new Date().toISOString();
-          data.review.reviewedBy = req.user?.id;
-        }
-
         return data;
       },
       autoTranslateHooks.beforeChange,
     ],
     afterChange: [
       async ({ doc, operation, req }) => {
-        // Invalidate cache after create or update
         const constructionName = doc.title || doc.slug || 'Unknown';
         cacheLogger.info(`Construction "${constructionName}" ${operation}d`, {
           constructionName,
@@ -864,7 +522,6 @@ export const Constructions: CollectionConfig = {
     ],
     afterDelete: [
       async ({ doc, req }) => {
-        // Invalidate cache after delete
         const constructionName = doc.title || doc.slug || 'Unknown';
         cacheLogger.info(`Construction "${constructionName}" deleted`, {
           constructionName,

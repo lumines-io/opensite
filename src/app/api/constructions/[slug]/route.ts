@@ -56,7 +56,7 @@ async function fetchConstructionBySlug(slug: string): Promise<ConstructionWithCh
       },
     },
     limit: 1,
-    depth: 2, // Include related data like district
+    depth: 2, // Include related data
   });
 
   if (constructions.length === 0) {

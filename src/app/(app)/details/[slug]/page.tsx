@@ -9,8 +9,9 @@ import { MiniMap } from './MiniMap';
 import { TimelineVisual } from './TimelineVisual';
 import { MetroLineVisualization } from './MetroLineVisualization';
 import { PageContent } from './PageContent';
+import { DevelopmentDetailContent } from './DevelopmentDetailContent';
 
-// Status colors and labels
+// Construction status colors and labels
 const STATUS_CONFIG: Record<string, { color: string; bgColor: string; borderColor: string; label: string; icon: string }> = {
   planned: { color: 'text-slate-700', bgColor: 'bg-slate-100', borderColor: 'border-slate-300', label: 'Kế hoạch', icon: '📋' },
   'in-progress': { color: 'text-amber-700', bgColor: 'bg-amber-50', borderColor: 'border-amber-300', label: 'Đang thi công', icon: '🚧' },
@@ -30,6 +31,43 @@ const TYPE_CONFIG: Record<string, { label: string; icon: string; color: string }
   other: { label: 'Khác', icon: '🏗️', color: 'bg-gray-500' },
 };
 
+// Helper function to find item in constructions or developments
+async function findBySlug(slug: string) {
+  const payload = await getPayload({ config });
+
+  // First, try constructions
+  const { docs: constructions } = await payload.find({
+    collection: 'constructions',
+    where: {
+      slug: { equals: slug },
+      _status: { equals: 'published' },
+    },
+    limit: 1,
+    depth: 2,
+  });
+
+  if (constructions.length > 0) {
+    return { type: 'construction' as const, data: constructions[0] };
+  }
+
+  // If not found in constructions, try developments
+  const { docs: developments } = await payload.find({
+    collection: 'developments',
+    where: {
+      slug: { equals: slug },
+      approvalStatus: { equals: 'published' },
+    },
+    limit: 1,
+    depth: 2,
+  });
+
+  if (developments.length > 0) {
+    return { type: 'development' as const, data: developments[0] };
+  }
+
+  return null;
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -37,27 +75,19 @@ interface PageProps {
 export default async function ConstructionDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const payload = await getPayload({ config });
+  const result = await findBySlug(slug);
 
-  const { docs: constructions } = await payload.find({
-    collection: 'constructions',
-    where: {
-      slug: {
-        equals: slug,
-      },
-      _status: {
-        equals: 'published',
-      },
-    },
-    limit: 1,
-    depth: 2,
-  });
-
-  if (constructions.length === 0) {
+  if (!result) {
     notFound();
   }
 
-  const construction = constructions[0];
+  // If it's a development, render the development content
+  if (result.type === 'development') {
+    return <DevelopmentDetailContent development={result.data} slug={slug} />;
+  }
+
+  // Otherwise, it's a construction - render the existing construction content
+  const construction = result.data;
   const statusConfig = STATUS_CONFIG[construction.constructionStatus] || STATUS_CONFIG.planned;
   const typeConfig = TYPE_CONFIG[construction.constructionType] || TYPE_CONFIG.other;
 
@@ -403,23 +433,21 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
 
-  const payload = await getPayload({ config });
+  const result = await findBySlug(slug);
 
-  const { docs: constructions } = await payload.find({
-    collection: 'constructions',
-    where: {
-      slug: { equals: slug },
-      _status: { equals: 'published' },
-    },
-    limit: 1,
-  });
-
-  if (constructions.length === 0) {
+  if (!result) {
     return { title: 'Không tìm thấy' };
   }
 
-  const construction = constructions[0];
+  if (result.type === 'development') {
+    const development = result.data;
+    return {
+      title: `${development.title} | OpenSite`,
+      description: development.headline || `${development.title} - ${development.developmentType}`,
+    };
+  }
 
+  const construction = result.data;
   return {
     title: `${construction.title} | OpenSite`,
     description: `Theo dõi tiến độ ${construction.title} - ${construction.progress}% hoàn thành`,

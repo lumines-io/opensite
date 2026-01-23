@@ -147,7 +147,7 @@ describe('Construction Map Utilities', () => {
   });
 
   describe('separateFeaturesByGeometry', () => {
-    it('should separate features into points, lines, and polygons', () => {
+    it('should separate features into points, lines, polygons, and detailMarkers', () => {
       const features: GeoJSON.Feature[] = [
         {
           type: 'Feature',
@@ -188,6 +188,32 @@ describe('Construction Map Utilities', () => {
       expect(result.points).toHaveLength(1);
       expect(result.lines).toHaveLength(1);
       expect(result.polygons).toHaveLength(1);
+      expect(result.detailMarkers).toHaveLength(0);
+    });
+
+    it('should separate detail markers from regular points', () => {
+      const features: GeoJSON.Feature[] = [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [106.7, 10.8] },
+          properties: { id: 1, isDetailMarker: false },
+        },
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [106.75, 10.85] },
+          properties: { id: 2, isDetailMarker: true, constructionType: 'metro_station' },
+        },
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [106.8, 10.9] },
+          properties: { id: 3, isDetailMarker: true, constructionType: 'freeway_exit' },
+        },
+      ];
+
+      const result = separateFeaturesByGeometry(features);
+
+      expect(result.points).toHaveLength(1);
+      expect(result.detailMarkers).toHaveLength(2);
     });
 
     it('should handle MultiPoint features as points', () => {
@@ -207,6 +233,7 @@ describe('Construction Map Utilities', () => {
 
       const result = separateFeaturesByGeometry(features);
       expect(result.points).toHaveLength(1);
+      expect(result.detailMarkers).toHaveLength(0);
     });
 
     it('should handle MultiLineString features as lines', () => {
@@ -272,6 +299,7 @@ describe('Construction Map Utilities', () => {
       expect(result.points).toHaveLength(0);
       expect(result.lines).toHaveLength(0);
       expect(result.polygons).toHaveLength(0);
+      expect(result.detailMarkers).toHaveLength(0);
     });
 
     it('should return empty arrays for empty input', () => {
@@ -279,6 +307,7 @@ describe('Construction Map Utilities', () => {
       expect(result.points).toHaveLength(0);
       expect(result.lines).toHaveLength(0);
       expect(result.polygons).toHaveLength(0);
+      expect(result.detailMarkers).toHaveLength(0);
     });
   });
 

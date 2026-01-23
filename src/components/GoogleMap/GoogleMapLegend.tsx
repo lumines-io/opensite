@@ -1,19 +1,16 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   TYPE_COLORS,
   STATUS_COLORS,
-  CATEGORY_COLORS,
+  SOURCE_COLLECTION_COLORS,
+  SOURCE_COLLECTION_LABELS,
+  DEVELOPMENT_TYPE_COLORS,
+  DEVELOPMENT_TYPE_LABELS,
   TYPE_LABELS,
   STATUS_LABELS_SHORT,
 } from './google-map.constants';
-
-// Short labels for categories
-const CATEGORY_LABELS_SHORT: Record<string, string> = {
-  'public': 'Công cộng',
-  'private': 'Tư nhân',
-};
 
 interface FilterToggleProps {
   color: string;
@@ -106,93 +103,154 @@ function LegendSection({
 export interface GoogleMapLegendProps {
   visibleTypes: Set<string>;
   visibleStatuses: Set<string>;
-  visibleCategories: Set<string>;
+  visibleSourceCollections: Set<string>;
+  visibleDevelopmentTypes?: Set<string>;
   onTypeToggle: (type: string) => void;
   onStatusToggle: (status: string) => void;
-  onCategoryToggle: (category: string) => void;
+  onSourceCollectionToggle: (source: string) => void;
+  onDevelopmentTypeToggle?: (type: string) => void;
   onToggleAllTypes: () => void;
   onToggleAllStatuses: () => void;
-  onToggleAllCategories: () => void;
+  onToggleAllSourceCollections: () => void;
+  onToggleAllDevelopmentTypes?: () => void;
 }
 
 /**
- * Map legend showing construction types, statuses, and categories with filter toggles
+ * Map legend showing construction types, statuses, and source collections with filter toggles
  */
 export function GoogleMapLegend({
   visibleTypes,
   visibleStatuses,
-  visibleCategories,
+  visibleSourceCollections,
+  visibleDevelopmentTypes,
   onTypeToggle,
   onStatusToggle,
-  onCategoryToggle,
+  onSourceCollectionToggle,
+  onDevelopmentTypeToggle,
   onToggleAllTypes,
   onToggleAllStatuses,
-  onToggleAllCategories,
+  onToggleAllSourceCollections,
+  onToggleAllDevelopmentTypes,
 }: GoogleMapLegendProps) {
+  const [showDevelopmentTypes, setShowDevelopmentTypes] = useState(false);
+
   const allTypesSelected = visibleTypes.size === Object.keys(TYPE_COLORS).length;
   const allStatusesSelected =
     visibleStatuses.size === Object.keys(STATUS_COLORS).length;
-  const allCategoriesSelected =
-    visibleCategories.size === Object.keys(CATEGORY_COLORS).length;
+  const allSourceCollectionsSelected =
+    visibleSourceCollections.size === Object.keys(SOURCE_COLLECTION_COLORS).length;
+  const allDevelopmentTypesSelected = visibleDevelopmentTypes
+    ? visibleDevelopmentTypes.size === Object.keys(DEVELOPMENT_TYPE_COLORS).length
+    : false;
+
+  // Check if developments are visible to show development type filters
+  const developmentsVisible = visibleSourceCollections.has('developments');
 
   return (
-    <div className="absolute bottom-4 left-4 bg-card rounded-lg shadow p-3 border border-border max-w-[220px] z-10">
-      {/* Construction Categories (Public vs Private) */}
+    <div className="absolute bottom-4 left-4 bg-card rounded-lg shadow p-3 border border-border max-w-[260px] z-10 max-h-[calc(100vh-120px)] overflow-y-auto">
+      {/* Source Collections (Constructions vs Developments) */}
       <LegendSection
-        title="Phân loại"
-        allSelected={allCategoriesSelected}
-        onToggleAll={onToggleAllCategories}
+        title="Nguồn dữ liệu"
+        allSelected={allSourceCollectionsSelected}
+        onToggleAll={onToggleAllSourceCollections}
       >
-        {Object.entries(CATEGORY_COLORS).map(([category, color]) => (
+        {Object.entries(SOURCE_COLLECTION_COLORS).map(([source, color]) => (
           <FilterToggle
-            key={category}
+            key={source}
             color={color}
-            label={CATEGORY_LABELS_SHORT[category] || category}
-            checked={visibleCategories.has(category)}
-            onChange={() => onCategoryToggle(category)}
+            label={SOURCE_COLLECTION_LABELS[source] || source}
+            checked={visibleSourceCollections.has(source)}
+            onChange={() => onSourceCollectionToggle(source)}
           />
         ))}
       </LegendSection>
 
-      {/* Divider */}
-      <div className="mt-3 pt-2 border-t border-border">
-        {/* Construction Types */}
-        <LegendSection
-          title="Loại công trình"
-          allSelected={allTypesSelected}
-          onToggleAll={onToggleAllTypes}
-        >
-          {Object.entries(TYPE_COLORS).map(([type, color]) => (
-            <FilterToggle
-              key={type}
-              color={color}
-              label={TYPE_LABELS[type] || type}
-              checked={visibleTypes.has(type)}
-              onChange={() => onTypeToggle(type)}
-            />
-          ))}
-        </LegendSection>
-      </div>
+      {/* Construction Types (only show if constructions visible) */}
+      {visibleSourceCollections.has('constructions') && (
+        <div className="mt-3 pt-2 border-t border-border">
+          <LegendSection
+            title="Loại hạ tầng"
+            allSelected={allTypesSelected}
+            onToggleAll={onToggleAllTypes}
+          >
+            {Object.entries(TYPE_COLORS).map(([type, color]) => (
+              <FilterToggle
+                key={type}
+                color={color}
+                label={TYPE_LABELS[type] || type}
+                checked={visibleTypes.has(type)}
+                onChange={() => onTypeToggle(type)}
+              />
+            ))}
+          </LegendSection>
+        </div>
+      )}
 
-      {/* Divider */}
-      <div className="mt-3 pt-2 border-t border-border">
-        {/* Construction Statuses */}
-        <LegendSection
-          title="Trạng thái"
-          allSelected={allStatusesSelected}
-          onToggleAll={onToggleAllStatuses}
-        >
-          {Object.entries(STATUS_COLORS).map(([status, color]) => (
-            <FilterToggle
-              key={status}
-              color={color}
-              label={STATUS_LABELS_SHORT[status] || status}
-              checked={visibleStatuses.has(status)}
-              onChange={() => onStatusToggle(status)}
-            />
-          ))}
-        </LegendSection>
-      </div>
+      {/* Construction Statuses (only show if constructions visible) */}
+      {visibleSourceCollections.has('constructions') && (
+        <div className="mt-3 pt-2 border-t border-border">
+          <LegendSection
+            title="Trạng thái"
+            allSelected={allStatusesSelected}
+            onToggleAll={onToggleAllStatuses}
+          >
+            {Object.entries(STATUS_COLORS).map(([status, color]) => (
+              <FilterToggle
+                key={status}
+                color={color}
+                label={STATUS_LABELS_SHORT[status] || status}
+                checked={visibleStatuses.has(status)}
+                onChange={() => onStatusToggle(status)}
+              />
+            ))}
+          </LegendSection>
+        </div>
+      )}
+
+      {/* Development Types (only show if developments visible and toggle enabled) */}
+      {developmentsVisible && onDevelopmentTypeToggle && visibleDevelopmentTypes && (
+        <div className="mt-3 pt-2 border-t border-border">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-xs font-semibold text-card-foreground">Loại bất động sản</h4>
+            <button
+              type="button"
+              onClick={() => setShowDevelopmentTypes(!showDevelopmentTypes)}
+              className="text-[10px] text-muted-foreground hover:text-card-foreground transition-colors"
+            >
+              {showDevelopmentTypes ? 'Thu gọn' : 'Mở rộng'}
+            </button>
+          </div>
+
+          {showDevelopmentTypes ? (
+            <div>
+              <div className="flex justify-end mb-1">
+                <button
+                  type="button"
+                  onClick={onToggleAllDevelopmentTypes}
+                  className="text-[10px] text-muted-foreground hover:text-card-foreground transition-colors"
+                >
+                  {allDevelopmentTypesSelected ? 'Bỏ chọn' : 'Chọn tất cả'}
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                {Object.entries(DEVELOPMENT_TYPE_COLORS).map(([type, color]) => (
+                  <FilterToggle
+                    key={type}
+                    color={color}
+                    label={DEVELOPMENT_TYPE_LABELS[type] || type}
+                    checked={visibleDevelopmentTypes.has(type)}
+                    onChange={() => onDevelopmentTypeToggle(type)}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-[10px] text-muted-foreground">
+              {visibleDevelopmentTypes.size} / {Object.keys(DEVELOPMENT_TYPE_COLORS).length} loại đang hiển thị
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

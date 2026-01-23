@@ -150,10 +150,16 @@ export const STATUS_COLORS: Record<string, string> = {
   'cancelled': '#6B7280', // dark gray
 };
 
-// Category colors for public vs private constructions
-export const CATEGORY_COLORS: Record<string, string> = {
-  'public': '#2563EB', // blue - government/infrastructure
-  'private': '#9333EA', // purple - commercial/real estate
+// Source collection colors
+export const SOURCE_COLLECTION_COLORS: Record<string, string> = {
+  'constructions': '#2563EB', // blue - infrastructure
+  'developments': '#9333EA', // purple - commercial/real estate
+};
+
+// Source collection labels
+export const SOURCE_COLLECTION_LABELS: Record<string, string> = {
+  'constructions': 'Hạ tầng',
+  'developments': 'Bất động sản',
 };
 
 // Construction type colors
@@ -165,18 +171,30 @@ export const TYPE_COLORS: Record<string, string> = {
   'interchange': '#DB2777', // pink - complex junction
   'road': '#2563EB', // blue - standard road
   'station': '#8B5CF6', // violet - transit station
+  'metro_station': '#A855F7', // purple-500 - metro station markers
+  'freeway_exit': '#EF4444', // red-500 - freeway exit markers
   'other': '#6B7280', // gray - misc
 };
 
-// Private construction type colors
-export const PRIVATE_TYPE_COLORS: Record<string, string> = {
-  'residential': '#EC4899', // pink - housing
-  'commercial': '#F97316', // orange - commerce
-  'office': '#3B82F6', // blue - office
+// Development type colors
+export const DEVELOPMENT_TYPE_COLORS: Record<string, string> = {
+  // Residential
+  'apartment_complex': '#EC4899', // pink - apartments
+  'condominium': '#F472B6', // light pink - condos
+  'villa_project': '#BE185D', // dark pink - villas
+  'townhouse_project': '#DB2777', // rose - townhouses
+  // Hospitality
+  'resort': '#14B8A6', // teal - resorts
+  'hotel': '#0D9488', // dark teal - hotels
+  'serviced_apartment': '#2DD4BF', // light teal - serviced
+  // Commercial
+  'commercial_center': '#F97316', // orange - commercial
+  'shopping_mall': '#FB923C', // light orange - malls
+  'office_building': '#3B82F6', // blue - office
+  'industrial_park': '#78716C', // stone - industrial
+  // Mixed & Other
   'mixed_use': '#8B5CF6', // violet - mixed
-  'industrial': '#78716C', // stone - industrial
-  'hospitality': '#14B8A6', // teal - hotels
-  'retail': '#EAB308', // yellow - retail
+  'township': '#A855F7', // purple - township
   'healthcare': '#EF4444', // red - medical
   'educational': '#22C55E', // green - schools
   'other': '#6B7280', // gray - other
@@ -191,6 +209,8 @@ export const TYPE_LABELS: Record<string, string> = {
   'interchange': 'Nút giao',
   'road': 'Đường',
   'station': 'Trạm',
+  'metro_station': 'Ga Metro',
+  'freeway_exit': 'Nút ra/vào',
   'other': 'Khác',
 };
 
@@ -203,23 +223,64 @@ export const STATUS_LABELS: Record<string, string> = {
   'cancelled': 'Đã hủy',
 };
 
-// Vietnamese labels for construction categories
-export const CATEGORY_LABELS: Record<string, string> = {
-  'public': 'Hạ tầng công cộng',
-  'private': 'Dự án tư nhân',
+// Vietnamese labels for development types
+export const DEVELOPMENT_TYPE_LABELS: Record<string, string> = {
+  // Residential
+  'apartment_complex': 'Chung cư',
+  'condominium': 'Căn hộ cao cấp',
+  'villa_project': 'Biệt thự',
+  'townhouse_project': 'Nhà phố',
+  // Hospitality
+  'resort': 'Resort',
+  'hotel': 'Khách sạn',
+  'serviced_apartment': 'Căn hộ dịch vụ',
+  // Commercial
+  'commercial_center': 'Trung tâm thương mại',
+  'shopping_mall': 'TTTM',
+  'office_building': 'Tòa văn phòng',
+  'industrial_park': 'Khu công nghiệp',
+  // Mixed & Other
+  'mixed_use': 'Tổ hợp đa năng',
+  'township': 'Khu đô thị',
+  'healthcare': 'Bệnh viện',
+  'educational': 'Trường học',
+  'other': 'Khác',
 };
 
-// Vietnamese labels for private construction types
-export const PRIVATE_TYPE_LABELS: Record<string, string> = {
-  'residential': 'Nhà ở',
-  'commercial': 'Thương mại',
-  'office': 'Văn phòng',
-  'mixed_use': 'Đa chức năng',
-  'industrial': 'Công nghiệp',
-  'hospitality': 'Khách sạn',
-  'retail': 'Bán lẻ',
-  'healthcare': 'Y tế',
-  'educational': 'Giáo dục',
+// Vietnamese labels for development status
+export const DEVELOPMENT_STATUS_LABELS: Record<string, string> = {
+  'upcoming': 'Sắp ra mắt',
+  'pre_launch': 'Sắp mở bán',
+  'selling': 'Đang bán',
+  'limited': 'Còn ít căn',
+  'sold_out': 'Đã bán hết',
+  'under_construction': 'Đang xây dựng',
+  'completed': 'Đã hoàn thành',
+};
+
+// Development status colors
+export const DEVELOPMENT_STATUS_COLORS: Record<string, string> = {
+  'upcoming': '#9CA3AF', // gray
+  'pre_launch': '#F59E0B', // amber
+  'selling': '#10B981', // green - available
+  'limited': '#EF4444', // red - urgency
+  'sold_out': '#6B7280', // dark gray
+  'under_construction': '#3B82F6', // blue
+  'completed': '#22C55E', // green
+};
+
+// Vietnamese labels for detail point types
+export const POINT_TYPE_LABELS: Record<string, string> = {
+  'station': 'Ga',
+  'depot': 'Depot',
+  'transfer': 'Điểm chuyển tuyến',
+  'exit': 'Nút ra/vào',
+  'interchange': 'Nút giao',
+  'toll': 'Trạm thu phí',
+  'rest_area': 'Trạm dừng nghỉ',
+  'bridge_section': 'Đoạn cầu',
+  'tunnel_portal': 'Cửa hầm',
+  'milestone': 'Mốc',
   'other': 'Khác',
 };
 
@@ -257,4 +318,5 @@ export const ZOOM_LEVELS = {
   SHOW_ALL: 12,
   MIN_SCALE: 8,
   MAX_SCALE: 16,
+  SHOW_DETAIL_MARKERS: 13, // Show detail markers (metro stations, freeway exits) at this zoom and above
 } as const;

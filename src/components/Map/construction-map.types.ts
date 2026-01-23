@@ -15,6 +15,15 @@ export interface Construction {
   organizationName?: string;
   startDate?: string;
   expectedEndDate?: string;
+  // Detail marker properties (for metro stations, freeway exits)
+  isDetailMarker?: boolean;
+  parentId?: string | number;
+  parentTitle?: string;
+  stationOrder?: number;
+  openedAt?: string;
+  exitOrder?: number;
+  exitType?: string;
+  connectedRoads?: string;
 }
 
 export interface ConstructionAlert {

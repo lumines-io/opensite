@@ -2,16 +2,20 @@
  * Utility functions for Google Maps components
  */
 
-import type { LatLng, Construction, ConstructionFeature } from './google-map.types';
+import type { LatLng, ConstructionFeature, MapFeature, Construction, Development } from './google-map.types';
+import { isConstruction, isDevelopment } from './google-map.types';
 import {
   TYPE_COLORS,
   STATUS_COLORS,
-  CATEGORY_COLORS,
-  PRIVATE_TYPE_COLORS,
+  SOURCE_COLLECTION_COLORS,
+  DEVELOPMENT_TYPE_COLORS,
+  DEVELOPMENT_STATUS_COLORS,
   TYPE_LABELS,
   STATUS_LABELS,
-  CATEGORY_LABELS,
-  PRIVATE_TYPE_LABELS,
+  SOURCE_COLLECTION_LABELS,
+  DEVELOPMENT_TYPE_LABELS,
+  DEVELOPMENT_STATUS_LABELS,
+  POINT_TYPE_LABELS,
 } from './google-map.constants';
 
 /**
@@ -82,7 +86,7 @@ export function featureCollectionToConstructionFeatures(
     .map((feature) => ({
       id: feature.properties!.id as string,
       geometry: feature.geometry!,
-      properties: feature.properties as Construction,
+      properties: feature.properties as MapFeature,
       center: getGeometryCenter(feature.geometry!),
     }));
 }
@@ -102,17 +106,24 @@ export function getStatusColor(status: string): string {
 }
 
 /**
- * Get color for construction category
+ * Get color for source collection
  */
-export function getCategoryColor(category: string): string {
-  return CATEGORY_COLORS[category] || CATEGORY_COLORS['public'];
+export function getSourceCollectionColor(source: string): string {
+  return SOURCE_COLLECTION_COLORS[source] || SOURCE_COLLECTION_COLORS['constructions'];
 }
 
 /**
- * Get color for private construction type
+ * Get color for development type
  */
-export function getPrivateTypeColor(privateType: string): string {
-  return PRIVATE_TYPE_COLORS[privateType] || PRIVATE_TYPE_COLORS['other'];
+export function getDevelopmentTypeColor(developmentType: string): string {
+  return DEVELOPMENT_TYPE_COLORS[developmentType] || DEVELOPMENT_TYPE_COLORS['other'];
+}
+
+/**
+ * Get color for development status
+ */
+export function getDevelopmentStatusColor(status: string): string {
+  return DEVELOPMENT_STATUS_COLORS[status] || DEVELOPMENT_STATUS_COLORS['upcoming'];
 }
 
 /**
@@ -130,17 +141,31 @@ export function getStatusLabel(status: string): string {
 }
 
 /**
- * Get Vietnamese label for category
+ * Get Vietnamese label for source collection
  */
-export function getCategoryLabel(category: string): string {
-  return CATEGORY_LABELS[category] || category;
+export function getSourceCollectionLabel(source: string): string {
+  return SOURCE_COLLECTION_LABELS[source] || source;
 }
 
 /**
- * Get Vietnamese label for private construction type
+ * Get Vietnamese label for development type
  */
-export function getPrivateTypeLabel(privateType: string): string {
-  return PRIVATE_TYPE_LABELS[privateType] || PRIVATE_TYPE_LABELS['other'];
+export function getDevelopmentTypeLabel(developmentType: string): string {
+  return DEVELOPMENT_TYPE_LABELS[developmentType] || DEVELOPMENT_TYPE_LABELS['other'];
+}
+
+/**
+ * Get Vietnamese label for development status
+ */
+export function getDevelopmentStatusLabel(status: string): string {
+  return DEVELOPMENT_STATUS_LABELS[status] || status;
+}
+
+/**
+ * Get Vietnamese label for detail point type
+ */
+export function getPointTypeLabel(pointType: string): string {
+  return POINT_TYPE_LABELS[pointType] || POINT_TYPE_LABELS['other'];
 }
 
 /**
@@ -160,178 +185,37 @@ export function formatDateVN(dateString: string): string {
 }
 
 /**
- * Get marker color based on construction properties
+ * Get marker color based on feature properties
  */
-export function getMarkerColor(construction: Construction): string {
-  if (construction.constructionCategory === 'private') {
-    return construction.privateType
-      ? getPrivateTypeColor(construction.privateType)
-      : CATEGORY_COLORS['private'];
+export function getMarkerColor(feature: MapFeature): string {
+  if (isDevelopment(feature)) {
+    // For developments, use custom marker color if set, otherwise development type color
+    if (feature.useCustomMarker && feature.markerColor) {
+      return feature.markerColor;
+    }
+    return getDevelopmentTypeColor(feature.developmentType);
   }
-  return getTypeColor(construction.constructionType);
+
+  // For constructions, use construction type color
+  if (isConstruction(feature)) {
+    return getTypeColor(feature.constructionType);
+  }
+
+  return TYPE_COLORS['other'];
 }
 
 /**
- * Marker style options for customization
- */
-export interface MarkerStyleOptions {
-  size?: number;
-  strokeWidth?: number;
-  strokeColor?: string;
-  opacity?: number;
-  pulseSpeed?: 'slow' | 'normal' | 'fast';
-  pulseScale?: number;
-  shadow?: boolean;
-  glow?: boolean;
-  glowColor?: string;
-  shape?: 'circle' | 'square' | 'diamond' | 'pin';
-}
-
-const PULSE_DURATIONS = {
-  slow: '2.5s',
-  normal: '1.5s',
-  fast: '0.8s',
-};
-
-/**
- * Create SVG marker icon for Google Maps with customization options
+ * Create SVG marker icon for Google Maps
  */
 export function createMarkerIcon(
   color: string,
-  options: MarkerStyleOptions = {}
+  size: number = 24
 ): google.maps.Icon {
-  const {
-    size = 24,
-    strokeWidth = 2,
-    strokeColor = 'white',
-    opacity = 1,
-    shadow = false,
-    glow = false,
-    glowColor,
-    shape = 'circle',
-  } = options;
-
-  const actualGlowColor = glowColor || color;
-  const shadowFilter = shadow
-    ? `<filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.3"/>
-       </filter>`
-    : '';
-  const glowFilter = glow
-    ? `<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-        <feMerge>
-          <feMergeNode in="coloredBlur"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-       </filter>`
-    : '';
-
-  const filterAttr = shadow ? 'filter="url(#shadow)"' : glow ? 'filter="url(#glow)"' : '';
-
-  let shapeElement: string;
-  switch (shape) {
-    case 'square':
-      shapeElement = `<rect x="4" y="4" width="16" height="16" rx="2" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" opacity="${opacity}" ${filterAttr}/>`;
-      break;
-    case 'diamond':
-      shapeElement = `<polygon points="12,2 22,12 12,22 2,12" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" opacity="${opacity}" ${filterAttr}/>`;
-      break;
-    case 'pin':
-      shapeElement = `<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth * 0.5}" opacity="${opacity}" ${filterAttr}/>`;
-      break;
-    default: // circle
-      shapeElement = `<circle cx="12" cy="12" r="10" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" opacity="${opacity}" ${filterAttr}/>`;
-  }
-
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
-      <defs>${shadowFilter}${glowFilter}</defs>
-      ${shapeElement}
+      <circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/>
     </svg>
   `;
-
-  return {
-    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-    scaledSize: new google.maps.Size(size, size),
-    anchor: new google.maps.Point(size / 2, shape === 'pin' ? size : size / 2),
-  };
-}
-
-/**
- * Create pulsing marker icon (for in-progress constructions) with customization
- */
-export function createPulsingMarkerIcon(
-  color: string,
-  options: MarkerStyleOptions = {}
-): google.maps.Icon {
-  const {
-    size = 24,
-    strokeWidth = 2,
-    strokeColor = 'white',
-    pulseSpeed = 'normal',
-    pulseScale = 1.25,
-    glow = true,
-    glowColor,
-    shape = 'circle',
-  } = options;
-
-  const duration = PULSE_DURATIONS[pulseSpeed];
-  const actualGlowColor = glowColor || color;
-
-  // Calculate animation values based on shape
-  const baseRadius = 8;
-  const maxRadius = baseRadius * pulseScale;
-
-  let shapeElement: string;
-  let pulseRing: string;
-
-  switch (shape) {
-    case 'square':
-      pulseRing = `
-        <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="${actualGlowColor}" stroke-width="2" opacity="0.5">
-          <animate attributeName="width" values="16;20;16" dur="${duration}" repeatCount="indefinite"/>
-          <animate attributeName="height" values="16;20;16" dur="${duration}" repeatCount="indefinite"/>
-          <animate attributeName="x" values="4;2;4" dur="${duration}" repeatCount="indefinite"/>
-          <animate attributeName="y" values="4;2;4" dur="${duration}" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="0.5;0.2;0.5" dur="${duration}" repeatCount="indefinite"/>
-        </rect>
-      `;
-      shapeElement = `<rect x="4" y="4" width="16" height="16" rx="2" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>`;
-      break;
-    case 'diamond':
-      pulseRing = `
-        <polygon points="12,2 22,12 12,22 2,12" fill="none" stroke="${actualGlowColor}" stroke-width="2" opacity="0.5">
-          <animate attributeName="opacity" values="0.5;0.2;0.5" dur="${duration}" repeatCount="indefinite"/>
-        </polygon>
-      `;
-      shapeElement = `
-        <polygon points="12,2 22,12 12,22 2,12" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}">
-          <animateTransform attributeName="transform" type="scale" values="1;${pulseScale};1" dur="${duration}" repeatCount="indefinite" additive="sum"/>
-        </polygon>
-      `;
-      break;
-    default: // circle
-      pulseRing = `
-        <circle cx="12" cy="12" r="${maxRadius}" fill="none" stroke="${actualGlowColor}" stroke-width="2" opacity="0">
-          <animate attributeName="r" values="${baseRadius};${maxRadius + 2};${baseRadius}" dur="${duration}" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="0.6;0;0.6" dur="${duration}" repeatCount="indefinite"/>
-        </circle>
-      `;
-      shapeElement = `
-        <circle cx="12" cy="12" r="${baseRadius}" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}">
-          <animate attributeName="r" values="${baseRadius};${baseRadius * 1.1};${baseRadius}" dur="${duration}" repeatCount="indefinite"/>
-        </circle>
-      `;
-  }
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
-      ${pulseRing}
-      ${shapeElement}
-    </svg>
-  `;
-
   return {
     url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
     scaledSize: new google.maps.Size(size, size),
@@ -340,334 +224,164 @@ export function createPulsingMarkerIcon(
 }
 
 /**
- * Create a status-based marker with appropriate styling
+ * Create smaller marker icon for detail markers (metro stations, freeway exits)
  */
-export function createStatusMarkerIcon(
+export function createDetailMarkerIcon(
   color: string,
-  status: string,
-  constructionType: string,
-  options: MarkerStyleOptions = {}
+  size: number = 16
 ): google.maps.Icon {
-  const isPulsing = status === 'in-progress';
-
-  // Customize based on construction type
-  const typeOptions: MarkerStyleOptions = {
-    ...options,
-    shape: getShapeForType(constructionType),
-    size: getSizeForType(constructionType, options.size),
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8" fill="${color}" stroke="white" stroke-width="2"/>
+    </svg>
+  `;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(size, size),
+    anchor: new google.maps.Point(size / 2, size / 2),
   };
-
-  if (isPulsing) {
-    return createPulsingMarkerIcon(color, {
-      ...typeOptions,
-      pulseSpeed: 'normal',
-      glow: true,
-    });
-  }
-
-  // Completed constructions get a subtle glow
-  if (status === 'completed') {
-    return createMarkerIcon(color, {
-      ...typeOptions,
-      glow: true,
-      opacity: 0.9,
-    });
-  }
-
-  // Paused constructions are dimmed
-  if (status === 'paused') {
-    return createMarkerIcon(color, {
-      ...typeOptions,
-      opacity: 0.6,
-    });
-  }
-
-  return createMarkerIcon(color, typeOptions);
 }
 
 /**
- * Get marker shape based on construction type
+ * Create pulsing marker icon (for in-progress constructions)
  */
-function getShapeForType(type: string): MarkerStyleOptions['shape'] {
-  switch (type) {
-    case 'metro':
-    case 'station':
-      return 'square';
-    case 'interchange':
-      return 'diamond';
-    default:
-      return 'circle';
-  }
-}
-
-/**
- * Get marker size based on construction type
- */
-function getSizeForType(type: string, defaultSize?: number): number {
-  const baseSize = defaultSize || 20;
-  switch (type) {
-    case 'highway':
-    case 'metro':
-      return baseSize * 1.2;
-    case 'bridge':
-    case 'interchange':
-      return baseSize * 1.1;
-    default:
-      return baseSize;
-  }
-}
-
-/**
- * Line style options for customization
- */
-export interface LineStyleOptions {
-  strokeWeight?: number;
-  strokeOpacity?: number;
-  dashPattern?: number[];
-  zIndex?: number;
-  animated?: boolean;
-  animationSpeed?: 'slow' | 'normal' | 'fast';
-}
-
-/**
- * Animation intervals in milliseconds for animated polylines
- */
-const LINE_ANIMATION_SPEEDS = {
-  slow: 100,
-  normal: 50,
-  fast: 25,
-};
-
-/**
- * Create an animated polyline with moving dash pattern
- * Returns a cleanup function to stop the animation
- */
-export function createAnimatedPolyline(
-  map: google.maps.Map,
-  path: google.maps.LatLngLiteral[],
+export function createPulsingMarkerIcon(
   color: string,
-  options: {
-    strokeWeight?: number;
-    zIndex?: number;
-    animationSpeed?: 'slow' | 'normal' | 'fast';
-  } = {}
-): { polyline: google.maps.Polyline; cleanup: () => void } {
-  const { strokeWeight = 5, zIndex = 100, animationSpeed = 'normal' } = options;
-
-  // Create the animated line symbol
-  const lineSymbol: google.maps.Symbol = {
-    path: 'M 0,-1 0,1',
-    strokeOpacity: 1,
-    strokeWeight: strokeWeight,
-    scale: 4,
+  size: number = 24
+): google.maps.Icon {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2">
+        <animate attributeName="r" values="8;10;8" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0.7;1" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  `;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(size, size),
+    anchor: new google.maps.Point(size / 2, size / 2),
   };
-
-  // Create the polyline with repeating symbols
-  const polyline = new google.maps.Polyline({
-    path,
-    strokeOpacity: 0, // Hide the base line
-    strokeColor: color,
-    strokeWeight: strokeWeight,
-    icons: [
-      {
-        icon: lineSymbol,
-        offset: '0',
-        repeat: '20px',
-      },
-    ],
-    map,
-    zIndex,
-  });
-
-  // Animate the line by moving the icon offset
-  let offset = 0;
-  const interval = LINE_ANIMATION_SPEEDS[animationSpeed];
-
-  const animationId = setInterval(() => {
-    offset = (offset + 1) % 200;
-    const icons = polyline.get('icons');
-    if (icons && icons[0]) {
-      icons[0].offset = offset / 2 + '%';
-      polyline.set('icons', icons);
-    }
-  }, interval);
-
-  const cleanup = () => {
-    clearInterval(animationId);
-    polyline.setMap(null);
-  };
-
-  return { polyline, cleanup };
 }
 
 /**
- * Create a pulsing glow polyline effect
- * Returns a cleanup function to stop the animation
+ * Create sponsored marker icon (for featured developments)
  */
-export function createPulsingPolyline(
-  map: google.maps.Map,
-  path: google.maps.LatLngLiteral[],
+export function createSponsoredMarkerIcon(
   color: string,
-  options: {
-    strokeWeight?: number;
-    zIndex?: number;
-    animationSpeed?: 'slow' | 'normal' | 'fast';
-  } = {}
-): { polylines: google.maps.Polyline[]; cleanup: () => void } {
-  const { strokeWeight = 5, zIndex = 100, animationSpeed = 'normal' } = options;
-
-  // Create base polyline
-  const basePolyline = new google.maps.Polyline({
-    path,
-    strokeColor: color,
-    strokeWeight: strokeWeight,
-    strokeOpacity: 1,
-    map,
-    zIndex,
-  });
-
-  // Create glow polyline (wider, semi-transparent)
-  const glowPolyline = new google.maps.Polyline({
-    path,
-    strokeColor: color,
-    strokeWeight: strokeWeight * 2.5,
-    strokeOpacity: 0.3,
-    map,
-    zIndex: zIndex - 1,
-  });
-
-  // Animate opacity
-  let opacity = 0.3;
-  let increasing = true;
-  const speeds = { slow: 80, normal: 50, fast: 30 };
-  const interval = speeds[animationSpeed];
-
-  const animationId = setInterval(() => {
-    if (increasing) {
-      opacity += 0.02;
-      if (opacity >= 0.5) increasing = false;
-    } else {
-      opacity -= 0.02;
-      if (opacity <= 0.15) increasing = true;
-    }
-    glowPolyline.setOptions({ strokeOpacity: opacity });
-  }, interval);
-
-  const cleanup = () => {
-    clearInterval(animationId);
-    basePolyline.setMap(null);
-    glowPolyline.setMap(null);
+  size: number = 28
+): google.maps.Icon {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="${color}" stroke="gold" stroke-width="3"/>
+      <circle cx="12" cy="12" r="5" fill="white" opacity="0.3"/>
+    </svg>
+  `;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(size, size),
+    anchor: new google.maps.Point(size / 2, size / 2),
   };
-
-  return { polylines: [basePolyline, glowPolyline], cleanup };
 }
 
 /**
- * Polygon style options for customization
+ * Check if construction type is a detail marker type
  */
-export interface PolygonStyleOptions {
-  fillOpacity?: number;
-  strokeWeight?: number;
-  strokeOpacity?: number;
-  zIndex?: number;
+export function isDetailMarkerType(type: string): boolean {
+  return type === 'metro_station' || type === 'freeway_exit';
 }
 
 /**
- * Get Data Layer style for a construction feature
+ * Get Data Layer style for a map feature
+ * @param feature - The Google Maps Data feature
+ * @param currentZoom - Current map zoom level (optional, for zoom-based visibility)
  */
 export function getFeatureStyle(
   feature: google.maps.Data.Feature,
-  customOptions?: {
-    marker?: MarkerStyleOptions;
-    line?: LineStyleOptions;
-    polygon?: PolygonStyleOptions;
-  }
+  currentZoom?: number
 ): google.maps.Data.StyleOptions {
-  const type = feature.getProperty('constructionType') as string;
-  const status = feature.getProperty('constructionStatus') as string;
-  const category = feature.getProperty('constructionCategory') as string;
-  const privateType = feature.getProperty('privateType') as string;
+  const sourceCollection = feature.getProperty('sourceCollection') as string;
+  const isDetailMarker = feature.getProperty('isDetailMarker') as boolean;
   const geometryType = feature.getGeometry()?.getType();
 
-  // Determine color based on category and type
-  let color: string;
-  if (category === 'private') {
-    color = privateType
-      ? getPrivateTypeColor(privateType)
-      : CATEGORY_COLORS['private'];
-  } else {
-    color = getTypeColor(type);
+  // Hide detail markers at low zoom levels (zoom < 13)
+  if (isDetailMarker && currentZoom !== undefined && currentZoom < 13) {
+    return { visible: false };
   }
 
-  // Determine if it should pulse (in-progress)
-  const isPulsing = status === 'in-progress';
-  const isPaused = status === 'paused';
-  const isCompleted = status === 'completed';
+  // Determine color and style based on source collection
+  let color: string;
+  let isPulsing = false;
+  let isFeatured = false;
+
+  if (sourceCollection === 'developments') {
+    // Development styling
+    const developmentType = feature.getProperty('developmentType') as string;
+    const featured = feature.getProperty('featured') as boolean;
+    const useCustomMarker = feature.getProperty('useCustomMarker') as boolean;
+    const markerColor = feature.getProperty('markerColor') as string;
+
+    if (useCustomMarker && markerColor) {
+      color = markerColor;
+    } else {
+      color = getDevelopmentTypeColor(developmentType);
+    }
+    isFeatured = featured;
+  } else {
+    // Construction styling
+    const type = feature.getProperty('constructionType') as string;
+    const status = feature.getProperty('constructionStatus') as string;
+
+    color = getTypeColor(type);
+    isPulsing = status === 'in-progress';
+  }
 
   // Style based on geometry type
   switch (geometryType) {
     case 'Point':
+      // Use smaller icons for detail markers (metro stations, freeway exits)
+      if (isDetailMarker) {
+        return {
+          icon: createDetailMarkerIcon(color, 14),
+          clickable: true,
+        };
+      }
+      // Use sponsored marker for featured developments
+      if (isFeatured) {
+        return {
+          icon: createSponsoredMarkerIcon(color, 28),
+          clickable: true,
+        };
+      }
       return {
-        icon: createStatusMarkerIcon(color, status, type, customOptions?.marker),
+        icon: isPulsing
+          ? createPulsingMarkerIcon(color, 20)
+          : createMarkerIcon(color, 20),
         clickable: true,
-        zIndex: isPulsing ? 100 : isCompleted ? 50 : 75,
       };
 
-    case 'LineString': {
-      const lineOptions = customOptions?.line || {};
-      // Base width varies by type
-      const baseWeight = getLineWeightForType(type);
-      const weight = isPulsing ? baseWeight * 1.2 : baseWeight;
-      const opacity = isPaused ? 0.5 : isPulsing ? 0.85 : 1;
-
+    case 'LineString':
       return {
         strokeColor: color,
-        strokeWeight: lineOptions.strokeWeight ?? weight,
-        strokeOpacity: lineOptions.strokeOpacity ?? opacity,
+        strokeWeight: isPulsing ? 5 : 4,
+        strokeOpacity: isPulsing ? 0.8 : 1,
         clickable: true,
-        zIndex: lineOptions.zIndex ?? (isPulsing ? 100 : 50),
       };
-    }
 
-    case 'Polygon': {
-      const polygonOptions = customOptions?.polygon || {};
-      const fillOpacity = isPaused ? 0.1 : isPulsing ? 0.35 : isCompleted ? 0.25 : 0.2;
-      const strokeOpacity = isPaused ? 0.5 : 1;
-
+    case 'Polygon':
       return {
         fillColor: color,
-        fillOpacity: polygonOptions.fillOpacity ?? fillOpacity,
+        fillOpacity: isPulsing ? 0.3 : 0.2,
         strokeColor: color,
-        strokeWeight: polygonOptions.strokeWeight ?? 2,
-        strokeOpacity: polygonOptions.strokeOpacity ?? strokeOpacity,
+        strokeWeight: 2,
+        strokeOpacity: 1,
         clickable: true,
-        zIndex: polygonOptions.zIndex ?? (isPulsing ? 100 : 50),
       };
-    }
 
     default:
       return {
         clickable: true,
       };
-  }
-}
-
-/**
- * Get line weight based on construction type
- */
-function getLineWeightForType(type: string): number {
-  switch (type) {
-    case 'highway':
-      return 6;
-    case 'metro':
-      return 5;
-    case 'bridge':
-    case 'tunnel':
-      return 5;
-    case 'interchange':
-      return 4;
-    default:
-      return 4;
   }
 }
 
@@ -678,17 +392,34 @@ export function featurePassesFilters(
   feature: ConstructionFeature,
   visibleTypes: Set<string>,
   visibleStatuses: Set<string>,
-  visibleCategories: Set<string>
+  visibleSourceCollections: Set<string>,
+  visibleDevelopmentTypes?: Set<string>
 ): boolean {
-  const { constructionType, constructionStatus, constructionCategory } =
-    feature.properties;
-  const category = constructionCategory || 'public';
+  const props = feature.properties;
+  const sourceCollection = props.sourceCollection;
 
-  return (
-    visibleTypes.has(constructionType) &&
-    visibleStatuses.has(constructionStatus) &&
-    visibleCategories.has(category)
-  );
+  // Check source collection filter
+  if (!visibleSourceCollections.has(sourceCollection)) {
+    return false;
+  }
+
+  if (isConstruction(props)) {
+    // For constructions, check type and status
+    return (
+      visibleTypes.has(props.constructionType) &&
+      visibleStatuses.has(props.constructionStatus)
+    );
+  }
+
+  if (isDevelopment(props)) {
+    // For developments, check development type if filter is provided
+    if (visibleDevelopmentTypes && visibleDevelopmentTypes.size > 0) {
+      return visibleDevelopmentTypes.has(props.developmentType);
+    }
+    return true;
+  }
+
+  return true;
 }
 
 /**
