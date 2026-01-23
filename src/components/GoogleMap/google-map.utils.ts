@@ -257,12 +257,13 @@ export function createMarkerIcon(
 export function createTypeIcon(
   type: string,
   color: string,
-  size: number = 28
+  size: number = 28,
+  opacity: number = 1
 ): google.maps.Icon {
   const iconPath = TYPE_ICON_PATHS[type] || TYPE_ICON_PATHS['other'];
 
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" opacity="${opacity}">
       <circle cx="12" cy="12" r="11" fill="${color}" stroke="white" stroke-width="1.5"/>
       <g transform="scale(0.55) translate(9.8, 9.8)" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="${iconPath}"/>
@@ -393,6 +394,7 @@ export function getFeatureStyle(
   // Determine color and style based on source collection
   let color: string;
   let isPulsing = false;
+  let isPlanned = false;
   let isFeatured = false;
   let constructionType = 'other';
 
@@ -417,7 +419,15 @@ export function getFeatureStyle(
     color = getTypeColor(type);
     constructionType = type;
     isPulsing = status === 'in-progress';
+    isPlanned = status === 'planned';
   }
+
+  // Z-index priority: in-progress (100) > completed/paused (50) > planned (10)
+  const getZIndex = () => {
+    if (isPulsing) return 100;
+    if (isPlanned) return 10;
+    return 50;
+  };
 
   // Style based on geometry type
   switch (geometryType) {
@@ -430,6 +440,7 @@ export function getFeatureStyle(
             ? createAnimatedTypeIcon(detailType, color, 18)
             : createTypeIcon(detailType, color, 18),
           clickable: true,
+          zIndex: getZIndex(),
         };
       }
       // Use sponsored marker for featured developments
@@ -437,6 +448,7 @@ export function getFeatureStyle(
         return {
           icon: createSponsoredMarkerIcon(color, 28),
           clickable: true,
+          zIndex: 80, // Featured developments have high priority
         };
       }
       // Use type-specific icons for constructions
@@ -444,8 +456,9 @@ export function getFeatureStyle(
         return {
           icon: isPulsing
             ? createAnimatedTypeIcon(constructionType, color, 24)
-            : createTypeIcon(constructionType, color, 24),
+            : createTypeIcon(constructionType, color, isPlanned ? 22 : 24),
           clickable: true,
+          zIndex: getZIndex(),
         };
       }
       // Default marker for other features (developments without featured status)
@@ -454,24 +467,27 @@ export function getFeatureStyle(
           ? createPulsingMarkerIcon(color, 20)
           : createMarkerIcon(color, 20),
         clickable: true,
+        zIndex: getZIndex(),
       };
 
     case 'LineString':
       return {
         strokeColor: color,
-        strokeWeight: isPulsing ? 5 : 4,
-        strokeOpacity: isPulsing ? 0.8 : 1,
+        strokeWeight: isPulsing ? 5 : isPlanned ? 3 : 4,
+        strokeOpacity: isPlanned ? 0.6 : isPulsing ? 0.8 : 1,
         clickable: true,
+        zIndex: getZIndex(),
       };
 
     case 'Polygon':
       return {
         fillColor: color,
-        fillOpacity: isPulsing ? 0.3 : 0.2,
+        fillOpacity: isPlanned ? 0.12 : isPulsing ? 0.3 : 0.2,
         strokeColor: color,
-        strokeWeight: 2,
-        strokeOpacity: 1,
+        strokeWeight: isPlanned ? 1.5 : 2,
+        strokeOpacity: isPlanned ? 0.6 : 1,
         clickable: true,
+        zIndex: getZIndex(),
       };
 
     default:
@@ -606,7 +622,8 @@ export function routeToGooglePath(
 
 /**
  * Create a pulsing polyline with glowing effect (for in-progress constructions)
- * Returns the polylines and a cleanup function
+ * Includes a type icon marker at the center of the line
+ * Returns the polylines, marker, and a cleanup function
  */
 export function createPulsingPolyline(
   map: google.maps.Map,
@@ -616,9 +633,10 @@ export function createPulsingPolyline(
     strokeWeight?: number;
     zIndex?: number;
     animationSpeed?: 'slow' | 'normal' | 'fast';
+    constructionType?: string;
   } = {}
-): { polylines: google.maps.Polyline[]; cleanup: () => void } {
-  const { strokeWeight = 5, zIndex = 100, animationSpeed = 'normal' } = options;
+): { polylines: google.maps.Polyline[]; marker?: google.maps.Marker; cleanup: () => void } {
+  const { strokeWeight = 5, zIndex = 100, animationSpeed = 'normal', constructionType } = options;
 
   // Create base polyline (solid line on top)
   // Set clickable: false so mouse events pass through to Data Layer
@@ -644,6 +662,21 @@ export function createPulsingPolyline(
     clickable: false,
   });
 
+  // Create type icon marker at the center of the line
+  let typeMarker: google.maps.Marker | undefined;
+  if (constructionType && path.length > 0) {
+    const midIdx = Math.floor(path.length / 2);
+    const centerPosition = path[midIdx];
+
+    typeMarker = new google.maps.Marker({
+      position: centerPosition,
+      map,
+      icon: createAnimatedTypeIcon(constructionType, color, 28),
+      zIndex: zIndex + 1,
+      clickable: false, // Let clicks pass through to Data Layer
+    });
+  }
+
   // Animate opacity for pulse effect
   let opacity = 0.3;
   let increasing = true;
@@ -665,14 +698,18 @@ export function createPulsingPolyline(
     clearInterval(animationId);
     basePolyline.setMap(null);
     glowPolyline.setMap(null);
+    if (typeMarker) {
+      typeMarker.setMap(null);
+    }
   };
 
-  return { polylines: [basePolyline, glowPolyline], cleanup };
+  return { polylines: [basePolyline, glowPolyline], marker: typeMarker, cleanup };
 }
 
 /**
- * Create pulsing polylines for all in-progress LineString features
- * Returns cleanup function to remove polylines and stop animations
+ * Create pulsing polylines for in-progress LineString features
+ * AND type icon markers for ALL visible LineString features
+ * Returns cleanup function to remove polylines, markers and stop animations
  */
 export function createAnimatedPolylinesForFeatures(
   map: google.maps.Map,
@@ -682,9 +719,10 @@ export function createAnimatedPolylinesForFeatures(
   visibleSourceCollections: Set<string>
 ): () => void {
   const cleanupFunctions: (() => void)[] = [];
+  const typeMarkers: google.maps.Marker[] = [];
 
   for (const feature of features) {
-    // Only process constructions that are in-progress and LineString geometry
+    // Only process constructions with LineString geometry
     if (
       feature.properties.sourceCollection !== 'constructions' ||
       feature.geometry.type !== 'LineString'
@@ -700,25 +738,47 @@ export function createAnimatedPolylinesForFeatures(
     if (!visibleTypes.has(props.constructionType)) continue;
     if (!visibleStatuses.has(props.constructionStatus)) continue;
 
-    // Only animate in-progress constructions
-    if (props.constructionStatus !== 'in-progress') continue;
-
     const coords = feature.geometry.coordinates as [number, number][];
     const path = geoJsonPathToLatLngPath(coords);
     const color = getTypeColor(props.constructionType);
+    const isInProgress = props.constructionStatus === 'in-progress';
+    const isPlanned = props.constructionStatus === 'planned';
 
-    // Create pulsing polyline
-    const { cleanup } = createPulsingPolyline(map, path, color, {
-      strokeWeight: 5,
-      zIndex: 100,
-      animationSpeed: 'normal',
-    });
+    // For in-progress constructions, create pulsing polyline with icon
+    if (isInProgress) {
+      const { cleanup } = createPulsingPolyline(map, path, color, {
+        strokeWeight: 5,
+        zIndex: 100,
+        animationSpeed: 'normal',
+        constructionType: props.constructionType,
+      });
+      cleanupFunctions.push(cleanup);
+    } else {
+      // For non-in-progress LineStrings, just add a type icon marker at center
+      if (path.length > 0) {
+        const midIdx = Math.floor(path.length / 2);
+        const centerPosition = path[midIdx];
 
-    cleanupFunctions.push(cleanup);
+        // Planned constructions: smaller icon, lower opacity, lower z-index
+        const iconSize = isPlanned ? 20 : 24;
+        const iconOpacity = isPlanned ? 0.6 : 1;
+        const markerZIndex = isPlanned ? 10 : 50;
+
+        const typeMarker = new google.maps.Marker({
+          position: centerPosition,
+          map,
+          icon: createTypeIcon(props.constructionType, color, iconSize, iconOpacity),
+          zIndex: markerZIndex,
+          clickable: false, // Let clicks pass through to Data Layer
+        });
+        typeMarkers.push(typeMarker);
+      }
+    }
   }
 
-  // Return cleanup function that cleans up all polylines
+  // Return cleanup function that cleans up all polylines and markers
   return () => {
     cleanupFunctions.forEach((cleanup) => cleanup());
+    typeMarkers.forEach((marker) => marker.setMap(null));
   };
 }
