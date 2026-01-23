@@ -25,6 +25,7 @@ import { Media } from './collections/Media';
 import { CronJobs } from './collections/CronJobs';
 import { CronJobLogs } from './collections/CronJobLogs';
 import { AnalyticsEvents } from './collections/AnalyticsEvents';
+import { AnalyticEvent } from './collections/AnalyticEvent';
 import { Logs } from './collections/Logs';
 
 // Billing Collections
@@ -170,6 +171,7 @@ export default buildConfig({
     CronJobs,
     CronJobLogs,
     AnalyticsEvents,
+    AnalyticEvent,
     Logs,
     // Billing Collections
     CreditTransactions,

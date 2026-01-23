@@ -21,6 +21,9 @@ export default defineConfig({
         'src/lib/workflow/suggestion-state-machine.ts',
         'src/lib/scraper/hash.ts',
         'src/components/layout/**/*.tsx',
+        'src/lib/universal-analytics/*.ts',
+        'src/lib/universal-analytics/**/*.ts',
+        'src/app/api/analytics/**/*.ts',
       ],
       exclude: [
         'src/**/*.test.ts',
