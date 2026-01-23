@@ -24,17 +24,17 @@ const DEFAULT_ZOOM = 12;
 // Mapbox access token - read from environment or window
 const getMapboxToken = (): string => {
   // Check for environment variable (server-side or build-time)
-  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) {
-    return process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_MAPBOX_TOKEN) {
+    return process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   }
   // Check for window variable (client-side)
   if (typeof window !== 'undefined') {
     // @ts-expect-error - window.__ENV__ might be set by the app
-    const envToken = window.__ENV__?.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+    const envToken = window.__ENV__?.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (envToken) return envToken;
 
     // Fallback to checking process.env through Next.js
-    const nextPublicToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+    const nextPublicToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (nextPublicToken) return nextPublicToken;
   }
   return '';
@@ -377,7 +377,7 @@ export const GeometryMapField: React.FC<GeometryMapFieldProps> = ({ path, readOn
           border: '1px solid var(--theme-elevation-100)'
         }}>
           <p style={{ margin: 0, color: 'var(--theme-error-500)' }}>
-            Mapbox access token not configured. Set NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN environment variable.
+            Mapbox access token not configured. Set NEXT_PUBLIC_MAPBOX_TOKEN environment variable.
           </p>
           {/* Still show JSON editor as fallback */}
           <div style={{ marginTop: '12px' }}>

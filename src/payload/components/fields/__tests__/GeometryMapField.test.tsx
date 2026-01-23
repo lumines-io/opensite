@@ -77,9 +77,9 @@ describe('GeometryMapField Component', () => {
     vi.clearAllMocks();
     mockValue.current = null;
     // Mock MAPBOX token
-    vi.stubEnv('NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN', 'test-token');
+    vi.stubEnv('NEXT_PUBLIC_MAPBOX_TOKEN', 'test-token');
     // @ts-expect-error - mocking process.env
-    process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN = 'test-token';
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = 'test-token';
   });
 
   afterEach(() => {
@@ -424,9 +424,9 @@ describe('GeometryMapField Component', () => {
 
   describe('No Mapbox Token', () => {
     beforeEach(() => {
-      vi.stubEnv('NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN', '');
+      vi.stubEnv('NEXT_PUBLIC_MAPBOX_TOKEN', '');
       // @ts-expect-error - mocking process.env
-      process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN = '';
+      process.env.NEXT_PUBLIC_MAPBOX_TOKEN = '';
     });
 
     it('should show error message when Mapbox token is not configured', async () => {
@@ -461,9 +461,9 @@ describe('GeometryMapField Utility Functions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockValue.current = null;
-    vi.stubEnv('NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN', 'test-token');
+    vi.stubEnv('NEXT_PUBLIC_MAPBOX_TOKEN', 'test-token');
     // @ts-expect-error - mocking process.env
-    process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN = 'test-token';
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = 'test-token';
   });
 
   describe('getGeometryLabel', () => {
@@ -582,9 +582,9 @@ describe('GeometryMapField GeoJSON Validation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockValue.current = null;
-    vi.stubEnv('NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN', 'test-token');
+    vi.stubEnv('NEXT_PUBLIC_MAPBOX_TOKEN', 'test-token');
     // @ts-expect-error - mocking process.env
-    process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN = 'test-token';
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = 'test-token';
   });
 
   const validGeometryTypes = [

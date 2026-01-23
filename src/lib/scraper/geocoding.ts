@@ -70,7 +70,7 @@ export async function geocodeLocation(
   }
 
   // Try Mapbox Geocoding API
-  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   if (!mapboxToken) {
     console.warn('Mapbox token not configured, using fallback coordinates');
     geocodeCache.set(cacheKey, null);

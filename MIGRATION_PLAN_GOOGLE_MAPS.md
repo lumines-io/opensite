@@ -84,7 +84,6 @@ This document outlines all touchpoints affected by migrating from Mapbox to Goog
 ### 2. Environment Variables
 
 **Current:**
-- `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
 - `NEXT_PUBLIC_MAPBOX_TOKEN`
 
 **Action Required:**
