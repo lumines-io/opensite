@@ -161,6 +161,23 @@ export function GoogleConstructionMap({
     }
   }, [theme]);
 
+  // Schedule popup hide with delay (defined early so it can be used in the Data Layer effect)
+  const scheduleHidePopup = useCallback(() => {
+    if (isMouseInPopup) return;
+
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+
+    hideTimeoutRef.current = setTimeout(() => {
+      if (!isMouseInPopup) {
+        setActiveConstruction(null);
+        setPopupPosition(null);
+      }
+      hideTimeoutRef.current = null;
+    }, POPUP_HIDE_DELAY);
+  }, [isMouseInPopup]);
+
   // Add/update Data Layer with GeoJSON
   useEffect(() => {
     if (!mapRef.current || !geojsonData) return;
@@ -461,23 +478,6 @@ export function GoogleConstructionMap({
       if (viewportTimeoutRef.current) clearTimeout(viewportTimeoutRef.current);
     };
   }, []);
-
-  // Schedule popup hide with delay
-  const scheduleHidePopup = useCallback(() => {
-    if (isMouseInPopup) return;
-
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-    }
-
-    hideTimeoutRef.current = setTimeout(() => {
-      if (!isMouseInPopup) {
-        setActiveConstruction(null);
-        setPopupPosition(null);
-      }
-      hideTimeoutRef.current = null;
-    }, POPUP_HIDE_DELAY);
-  }, [isMouseInPopup]);
 
   // Hide popup immediately
   const hidePopup = useCallback(() => {
