@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePayloadAPI } from '@payloadcms/ui';
+import { Settings, Palette, Server, Globe, Check, Ban, AlertTriangle, ClipboardList, Info, ChevronDown } from 'lucide-react';
 
 interface FeatureFlag {
   key: string;
@@ -38,36 +39,19 @@ interface FeatureFlagsResponse {
 const categoryLabels: Record<string, { label: string; icon: React.ReactNode }> = {
   core: {
     label: 'Core Features',
-    icon: (
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
+    icon: <Settings size={20} />,
   },
   ui: {
     label: 'User Interface',
-    icon: (
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-      </svg>
-    ),
+    icon: <Palette size={20} />,
   },
   ops: {
     label: 'Operations',
-    icon: (
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-      </svg>
-    ),
+    icon: <Server size={20} />,
   },
   external: {
     label: 'External Services',
-    icon: (
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-      </svg>
-    ),
+    icon: <Globe size={20} />,
   },
 };
 
@@ -175,36 +159,28 @@ export const FeatureTogglesView: React.FC = () => {
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--green">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <Check size={20} />
           </div>
           <div className="stat-card__value">{enabledCount}</div>
           <div className="stat-card__label">Enabled</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--amber">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-            </svg>
+            <Ban size={20} />
           </div>
           <div className="stat-card__value">{disabledCount}</div>
           <div className="stat-card__label">Disabled</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--red">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+            <AlertTriangle size={20} />
           </div>
           <div className="stat-card__value">{highImpactDisabled}</div>
           <div className="stat-card__label">High Impact Disabled</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--teal">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
+            <ClipboardList size={20} />
           </div>
           <div className="stat-card__value">{data.flags.length}</div>
           <div className="stat-card__label">Total Flags</div>
@@ -221,9 +197,7 @@ export const FeatureTogglesView: React.FC = () => {
         alignItems: 'flex-start',
         gap: 12,
       }}>
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" style={{ flexShrink: 0, marginTop: 2 }}>
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <Info size={20} color="#f59e0b" style={{ flexShrink: 0, marginTop: 2 }} />
         <div>
           <div style={{ fontWeight: 600, color: '#92400e', marginBottom: 4 }}>Configuration Note</div>
           <div style={{ fontSize: '0.875rem', color: '#b45309' }}>
@@ -265,20 +239,14 @@ export const FeatureTogglesView: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <svg
-                  width="20"
-                  height="20"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+                <ChevronDown
+                  size={20}
                   style={{
                     transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.2s ease',
                     color: 'var(--theme-elevation-300)',
                   }}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </button>
 
               {isExpanded && (

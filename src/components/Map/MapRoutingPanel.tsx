@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { X, Loader2, Map, ArrowUpDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import { getStatusColor, getStatusLabel, formatDistance, formatDuration } from '@/lib/construction-utils';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
@@ -266,9 +267,7 @@ export function MapRoutingPanel({
         className="absolute top-32 left-4 z-10 w-10 h-10 bg-blue-600 shadow-lg rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
         title="Chỉ đường"
       >
-        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-        </svg>
+        <Map className="w-5 h-5 text-white" strokeWidth={2} />
       </button>
     );
   }
@@ -289,9 +288,7 @@ export function MapRoutingPanel({
           }}
           className="p-1 hover:bg-blue-700 rounded transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="w-4 h-4" strokeWidth={2} />
         </button>
       </div>
 
@@ -338,9 +335,7 @@ export function MapRoutingPanel({
             className="p-1 hover:bg-muted rounded transition-colors"
             title="Đổi điểm đi/đến"
           >
-            <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-            </svg>
+            <ArrowUpDown className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
           </button>
         </div>
 
@@ -386,10 +381,7 @@ export function MapRoutingPanel({
           >
             {isCalculating ? (
               <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
+                <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
                 <span>Đang tính...</span>
               </>
             ) : (
@@ -438,26 +430,20 @@ export function MapRoutingPanel({
                       {formatDistance(routeInfo.distance)}
                     </p>
                   </div>
-                  <svg className="w-8 h-8 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
+                  <Map className="w-8 h-8 text-blue-500 dark:text-blue-400" strokeWidth={1.5} />
                 </div>
               </div>
 
               {/* Construction alerts */}
               <div>
                 <h3 className="text-xs font-medium text-foreground mb-2 flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
+                  <AlertTriangle className="w-4 h-4 text-amber-500" strokeWidth={2} />
                   Công trình trên đường ({alerts.length})
                 </h3>
 
                 {alerts.length === 0 ? (
                   <div className="bg-green-500/10 dark:bg-green-500/20 rounded-lg p-3 text-center">
-                    <svg className="w-6 h-6 mx-auto text-green-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <CheckCircle className="w-6 h-6 mx-auto text-green-500 mb-1" strokeWidth={2} />
                     <p className="text-green-600 dark:text-green-400 text-xs font-medium">Không có công trình</p>
                     <p className="text-green-600/80 dark:text-green-400/80 text-[10px]">Tuyến đường thông thoáng</p>
                   </div>

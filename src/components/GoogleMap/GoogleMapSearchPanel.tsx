@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
+import { Search, X, ChevronDown } from 'lucide-react';
 import { GOOGLE_MAPS_LIBRARIES } from './google-map.constants';
 import type { Construction, ConstructionAlert, LatLng } from './google-map.types';
 
@@ -92,19 +93,7 @@ export function GoogleMapSearchPanel({
         className="absolute top-20 left-4 z-10 w-10 h-10 bg-card shadow-lg rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
         aria-label="Mở tìm kiếm"
       >
-        <svg
-          className="w-5 h-5 text-foreground"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+        <Search className="w-5 h-5 text-foreground" />
       </button>
     );
   }
@@ -115,19 +104,7 @@ export function GoogleMapSearchPanel({
       {/* Search input */}
       <div className="p-3 border-b border-border">
         <div className="relative">
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 
           <Autocomplete
             onLoad={onLoad}
@@ -156,19 +133,7 @@ export function GoogleMapSearchPanel({
                 className="p-1 rounded hover:bg-background transition-colors"
                 aria-label="Xóa"
               >
-                <svg
-                  className="w-4 h-4 text-muted-foreground"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="w-4 h-4 text-muted-foreground" />
               </button>
             )}
             <button
@@ -176,19 +141,7 @@ export function GoogleMapSearchPanel({
               className="p-1 rounded hover:bg-background transition-colors"
               aria-label="Đóng"
             >
-              <svg
-                className="w-4 h-4 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
         </div>

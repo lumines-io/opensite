@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import Map, { NavigationControl, GeolocateControl } from 'react-map-gl/mapbox';
+import { Circle, Minus, Square, MousePointer, Trash2, Loader2, Map as MapIcon } from 'lucide-react';
 import type { MapRef } from 'react-map-gl/mapbox';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -300,9 +301,7 @@ export const MapDrawer = forwardRef<MapDrawerRef, MapDrawerProps>(({
           className={`p-2 rounded ${currentMode === 'draw_point' ? 'bg-amber-500 text-white' : 'hover:bg-gray-100'}`}
           title="Draw Point"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <circle cx="10" cy="10" r="4" />
-          </svg>
+          <Circle className="w-5 h-5" fill="currentColor" />
         </button>
         <button
           onClick={() => {
@@ -312,9 +311,7 @@ export const MapDrawer = forwardRef<MapDrawerRef, MapDrawerProps>(({
           className={`p-2 rounded ${currentMode === 'draw_line_string' ? 'bg-amber-500 text-white' : 'hover:bg-gray-100'}`}
           title="Draw Line"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 20 20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l6-6 6 6" />
-          </svg>
+          <Minus className="w-5 h-5" />
         </button>
         <button
           onClick={() => {
@@ -324,9 +321,7 @@ export const MapDrawer = forwardRef<MapDrawerRef, MapDrawerProps>(({
           className={`p-2 rounded ${currentMode === 'draw_polygon' ? 'bg-amber-500 text-white' : 'hover:bg-gray-100'}`}
           title="Draw Polygon"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 20 20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h12v12H4z" />
-          </svg>
+          <Square className="w-5 h-5" />
         </button>
         <div className="w-px bg-gray-300" />
         <button
@@ -337,9 +332,7 @@ export const MapDrawer = forwardRef<MapDrawerRef, MapDrawerProps>(({
           className={`p-2 rounded ${currentMode === 'simple_select' ? 'bg-amber-500 text-white' : 'hover:bg-gray-100'}`}
           title="Select"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 20 20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-5-5m0 0l-5 5m5-5V3" />
-          </svg>
+          <MousePointer className="w-5 h-5" />
         </button>
         <button
           onClick={() => {
@@ -349,9 +342,7 @@ export const MapDrawer = forwardRef<MapDrawerRef, MapDrawerProps>(({
           className="p-2 rounded hover:bg-red-100 text-red-600"
           title="Delete Selected"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 20 20">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
+          <Trash2 className="w-5 h-5" />
         </button>
         {snapToRoad && (
           <>
@@ -363,14 +354,9 @@ export const MapDrawer = forwardRef<MapDrawerRef, MapDrawerProps>(({
               title="Snap to Road"
             >
               {isSnapping ? (
-                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 20 20">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
+                <MapIcon className="w-5 h-5" />
               )}
             </button>
           </>

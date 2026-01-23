@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
+import { Search } from 'lucide-react';
 import { GoogleMapSearchPanel } from '@/components/GoogleMap';
 import type { LatLng, ConstructionAlert } from '@/components/GoogleMap';
 import { FilterSearchOverlay } from '@/components/FilterSearchOverlay';
@@ -90,9 +91,7 @@ export function HomePage({ googleMapsApiKey }: HomePageProps) {
               onClick={() => setIsFilterSearchOpen(true)}
               className="flex items-center gap-2 px-3 py-1.5 text-body-sm bg-amber-500 text-white hover:bg-amber-600 rounded-lg transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <Search className="w-4 h-4" />
               <span className="hidden sm:inline">{t('searchConstruction')}</span>
             </button>
           )}

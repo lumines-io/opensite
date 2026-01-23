@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { CheckCircle } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
 interface RegisterFormProps {
@@ -71,19 +72,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     return (
       <div className="w-full max-w-md mx-auto text-center">
         <div className="mb-4">
-          <svg
-            className="w-16 h-16 mx-auto text-green-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <CheckCircle className="w-16 h-16 mx-auto text-green-500" strokeWidth={2} />
         </div>
         <h2 className="text-heading-xl text-foreground mb-2">{t('checkEmail')}</h2>
         <p className="text-body-md text-muted-foreground mb-4">

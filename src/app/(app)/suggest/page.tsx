@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { getPayload } from 'payload';
 import config from '@payload-config';
 import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 import { SuggestionForm } from '@/components/SuggestionForm';
 import { ContentPageTemplate } from '@/components/layout';
 import { Alert } from '@/components/ui';
@@ -56,9 +57,7 @@ export default async function SuggestPage() {
         href="/"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeft className="w-4 h-4" />
         Back to Map
       </Link>
 

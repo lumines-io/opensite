@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Map } from 'lucide-react';
 
 interface HeaderLogoProps {
   showTagline?: boolean;
@@ -13,21 +14,7 @@ export function HeaderLogo({ showTagline = false }: HeaderLogoProps) {
   return (
     <Link href="/" className="flex items-center gap-3">
       <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="white"
-          className="w-5 h-5"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"
-          />
-        </svg>
+        <Map className="w-5 h-5 text-white" strokeWidth={2} aria-hidden="true" />
       </div>
       <div>
         <h1 className="font-semibold text-foreground">{t('appName')}</h1>

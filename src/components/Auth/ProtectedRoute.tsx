@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { Loader2, Mail } from 'lucide-react';
 import { useAuth, type UserRole } from './AuthContext';
 
 interface ProtectedRouteProps {
@@ -67,25 +68,7 @@ export function ProtectedRoute({
       fallback || (
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center">
-            <svg
-              className="w-12 h-12 mx-auto text-blue-500 animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
+            <Loader2 className="w-12 h-12 mx-auto text-blue-500 animate-spin" />
             <p className="mt-4 text-muted-foreground">Loading...</p>
           </div>
         </div>
@@ -105,19 +88,7 @@ export function ProtectedRoute({
         <div className="max-w-md w-full text-center">
           <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
             <div className="mb-4">
-              <svg
-                className="w-16 h-16 mx-auto text-yellow-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
+              <Mail className="w-16 h-16 mx-auto text-yellow-500" strokeWidth={2} />
             </div>
             <h2 className="text-xl font-semibold text-foreground mb-2">
               Email Verification Required

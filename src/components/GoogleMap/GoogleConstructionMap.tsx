@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import { List } from 'lucide-react';
 
 import { useTheme } from '../ThemeProvider';
 import {
@@ -634,19 +635,7 @@ export function GoogleConstructionMap({
         onClick={() => setIsListModalOpen(true)}
         className="absolute bottom-24 right-4 z-10 flex items-center gap-2 px-3 py-2 bg-card shadow-lg rounded-lg hover:bg-muted transition-colors"
       >
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6h16M4 10h16M4 14h16M4 18h16"
-          />
-        </svg>
+        <List className="w-5 h-5" />
         <span className="text-sm font-medium">{visibleFeatures.length}</span>
       </button>
 

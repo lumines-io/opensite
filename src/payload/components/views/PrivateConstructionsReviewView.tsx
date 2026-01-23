@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { usePayloadAPI } from '@payloadcms/ui';
+import { Building2, Clock, FileText } from 'lucide-react';
 
 interface Construction {
   id: string;
@@ -190,42 +191,21 @@ export const PrivateConstructionsReviewView: React.FC = () => {
         <div className="stats-grid" style={{ marginBottom: 24 }}>
           <div className="stat-card">
             <div className="stat-card__icon stat-card__icon--teal">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
+              <Building2 size={20} />
             </div>
             <div className="stat-card__value">{data.totalDocs}</div>
             <div className="stat-card__label">Total Submissions</div>
           </div>
           <div className="stat-card">
             <div className="stat-card__icon stat-card__icon--amber">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              <Clock size={20} />
             </div>
             <div className="stat-card__value">{constructions.length}</div>
             <div className="stat-card__label">On This Page</div>
           </div>
           <div className="stat-card">
             <div className="stat-card__icon stat-card__icon--purple">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                />
-              </svg>
+              <FileText size={20} />
             </div>
             <div className="stat-card__value">
               {data.page} / {data.totalPages}
@@ -432,14 +412,7 @@ export const PrivateConstructionsReviewView: React.FC = () => {
       ) : (
         <div className="empty-state">
           <div className="empty-state__icon">
-            <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-              />
-            </svg>
+            <Building2 size={64} />
           </div>
           <div className="empty-state__title">No constructions to review</div>
           <div className="empty-state__description">

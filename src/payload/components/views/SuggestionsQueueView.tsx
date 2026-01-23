@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { usePayloadAPI } from '@payloadcms/ui';
+import { ClipboardList, Clock, FileText } from 'lucide-react';
 
 interface Suggestion {
   id: string;
@@ -116,27 +117,21 @@ export const SuggestionsQueueView: React.FC = () => {
         <div className="stats-grid" style={{ marginBottom: 24 }}>
           <div className="stat-card">
             <div className="stat-card__icon stat-card__icon--teal">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
+              <ClipboardList size={20} />
             </div>
             <div className="stat-card__value">{data.totalDocs}</div>
             <div className="stat-card__label">Total Suggestions</div>
           </div>
           <div className="stat-card">
             <div className="stat-card__icon stat-card__icon--amber">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <Clock size={20} />
             </div>
             <div className="stat-card__value">{suggestions.length}</div>
             <div className="stat-card__label">On This Page</div>
           </div>
           <div className="stat-card">
             <div className="stat-card__icon stat-card__icon--purple">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
+              <FileText size={20} />
             </div>
             <div className="stat-card__value">{data.page} / {data.totalPages}</div>
             <div className="stat-card__label">Current Page</div>
@@ -285,9 +280,7 @@ export const SuggestionsQueueView: React.FC = () => {
       ) : (
         <div className="empty-state">
           <div className="empty-state__icon">
-            <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
+            <ClipboardList size={64} />
           </div>
           <div className="empty-state__title">No suggestions found</div>
           <div className="empty-state__description">

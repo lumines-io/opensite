@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { Check, Pencil, RotateCcw, Link, X, Loader2 } from 'lucide-react';
 import { GeometryEditor } from '@/components/GeometryEditor';
 import { CoordinateAdjuster, type CoordinatePoint } from '@/components/Map';
 import { useSuggestionDraft } from '@/hooks/useSuggestionDraft';
@@ -574,9 +575,7 @@ export function SuggestionForm({
       <div className="max-w-2xl mx-auto p-6">
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-8 text-center">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <Check className="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
           <h2 className="text-xl font-semibold text-green-800 dark:text-green-200 mb-2">
             Suggestion Submitted!
@@ -615,9 +614,7 @@ export function SuggestionForm({
       {isEditMode && initialData?.construction && (
         <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
           <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+            <Pencil className="w-5 h-5" />
             <span className="font-medium">Editing: {initialData.construction.title}</span>
           </div>
         </div>
@@ -655,9 +652,7 @@ export function SuggestionForm({
                   }`}
                 >
                   {step.id < currentStep ? (
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    <Check className="w-5 h-5" />
                   ) : (
                     step.id
                   )}
@@ -1066,9 +1061,7 @@ export function SuggestionForm({
                       }}
                       className="text-sm text-amber-600 hover:text-amber-700 flex items-center gap-1"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
+                      <RotateCcw className="w-4 h-4" />
                       Reset coordinates
                     </button>
                   )}
@@ -1190,18 +1183,14 @@ export function SuggestionForm({
                       key={index}
                       className="flex items-center gap-2 p-2 bg-muted rounded-lg"
                     >
-                      <svg className="w-4 h-4 text-muted-foreground shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
+                      <Link className="w-4 h-4 text-muted-foreground shrink-0" />
                       <span className="flex-1 truncate text-sm">{item.url}</span>
                       <button
                         type="button"
                         onClick={() => removeUrl(index)}
                         className="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 rounded"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X className="w-4 h-4" />
                       </button>
                     </li>
                   ))}
@@ -1313,10 +1302,7 @@ export function SuggestionForm({
               >
                 {isSubmitting ? (
                   <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     Submitting...
                   </>
                 ) : (

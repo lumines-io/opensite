@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { X, Loader2, ArrowUpDown, Map, AlertTriangle, CheckCircle, ChevronLeft, ExternalLink, Calendar, Info } from 'lucide-react';
 import { getStatusColor, getStatusLabel, getTypeLabel, formatDistance, formatDuration } from '@/lib/construction-utils';
 import { useAnimatedVisibility } from '@/hooks/useAnimatedVisibility';
 import { useListNavigation } from '@/hooks/useListNavigation';
@@ -347,9 +348,7 @@ export function RoutingOverlay({
               onClick={onClose}
               className="p-2 hover:bg-muted rounded-full transition-colors"
             >
-              <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-5 h-5 text-foreground" />
             </button>
           </div>
 
@@ -397,9 +396,7 @@ export function RoutingOverlay({
                 className="p-1 hover:bg-muted rounded transition-colors"
                 title="Đổi điểm đi/đến"
               >
-                <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                </svg>
+                <ArrowUpDown className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
 
@@ -474,17 +471,12 @@ export function RoutingOverlay({
             >
               {isCalculating ? (
                 <>
-                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   <span>Đang tính...</span>
                 </>
               ) : (
                 <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
+                  <Map className="w-5 h-5" />
                   <span>Tìm đường</span>
                 </>
               )}
@@ -530,26 +522,20 @@ export function RoutingOverlay({
                       {formatDistance(routeInfo.distance)}
                     </p>
                   </div>
-                  <svg className="w-10 h-10 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
+                  <Map className="w-10 h-10 text-blue-500 dark:text-blue-400" strokeWidth={1.5} />
                 </div>
               </div>
 
               {/* Construction alerts */}
               <div>
                 <h3 className="font-medium text-foreground mb-3 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
+                  <AlertTriangle className="w-5 h-5 text-amber-500" />
                   Công trình trên tuyến đường ({alerts.length})
                 </h3>
 
                 {alerts.length === 0 ? (
                   <div className="bg-green-500/10 dark:bg-green-500/20 rounded-lg p-4 text-center">
-                    <svg className="w-8 h-8 mx-auto text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <CheckCircle className="w-8 h-8 mx-auto text-green-500 mb-2" />
                     <p className="text-green-600 dark:text-green-400 font-medium">Không có công trình nào</p>
                     <p className="text-green-600/80 dark:text-green-400/80 text-sm">Tuyến đường thông thoáng</p>
                   </div>
@@ -594,9 +580,7 @@ export function RoutingOverlay({
             </div>
           ) : (
             <div className="p-4 text-center text-muted-foreground">
-              <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
+              <Map className="w-12 h-12 mx-auto mb-3 opacity-50" strokeWidth={1.5} />
               <p className="text-body-sm">Nhập điểm đi và điểm đến để xem tuyến đường</p>
               <p className="text-caption text-muted-foreground mt-1">Hệ thống sẽ cảnh báo các công trình trên đường đi</p>
             </div>
@@ -619,9 +603,7 @@ export function RoutingOverlay({
                 onClick={closeDetailsSidebar}
                 className="p-2 hover:bg-muted rounded-full transition-colors -ml-2"
               >
-                <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
+                <ChevronLeft className="w-5 h-5 text-foreground" />
               </button>
               <Link
                 href={`/details/${selectedAlert.slug}`}
@@ -629,9 +611,7 @@ export function RoutingOverlay({
                 className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
               >
                 Xem chi tiết
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
+                <ExternalLink className="w-4 h-4" />
               </Link>
             </div>
             <h3 className="text-heading-lg text-foreground">{selectedAlert.title}</h3>
@@ -690,9 +670,7 @@ export function RoutingOverlay({
               {(selectedAlert.startDate || selectedAlert.expectedEndDate) && (
                 <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                   <h4 className="text-label-md text-foreground flex items-center gap-2">
-                    <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
                     Thời gian thi công
                   </h4>
                   {selectedAlert.startDate && (
@@ -725,9 +703,7 @@ export function RoutingOverlay({
               {/* Warning */}
               <div className="bg-amber-500/10 dark:bg-amber-500/20 border border-amber-400/30 rounded-lg p-4">
                 <div className="flex gap-3">
-                  <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-label-md text-amber-900 dark:text-amber-200">Lưu ý khi đi qua khu vực này</p>
                     <p className="text-caption text-amber-800 dark:text-amber-300 mt-1">
@@ -746,9 +722,7 @@ export function RoutingOverlay({
               onClick={(e) => handleViewDetails(selectedAlert, e)}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <Info className="w-5 h-5" />
               Xem thông tin đầy đủ
             </Link>
           </div>

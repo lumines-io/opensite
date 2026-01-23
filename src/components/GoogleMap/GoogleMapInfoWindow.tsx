@@ -2,6 +2,7 @@
 
 import { useRef, useCallback, useEffect, useState } from 'react';
 import { InfoWindow } from '@react-google-maps/api';
+import { Building2, ExternalLink, Star, DollarSign, Link2, CircleDot, Clock, Flag } from 'lucide-react';
 import {
   STATUS_COLORS,
   DEVELOPMENT_STATUS_COLORS,
@@ -118,27 +119,7 @@ function SponsorBadge({ organizationName, showBadge = true }: { organizationName
 
   return (
     <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="10"
-        height="10"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="text-purple-600 dark:text-purple-400"
-      >
-        <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16" />
-        <path d="M1 21h22" />
-        <path d="M9 7h1" />
-        <path d="M9 11h1" />
-        <path d="M9 15h1" />
-        <path d="M14 7h1" />
-        <path d="M14 11h1" />
-        <path d="M14 15h1" />
-      </svg>
+      <Building2 className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400" />
       <span className="text-[10px] font-medium text-purple-700 dark:text-purple-300 truncate max-w-[100px]">
         {organizationName || 'Dự án'}
       </span>
@@ -152,16 +133,7 @@ function SponsorBadge({ organizationName, showBadge = true }: { organizationName
 function FeaturedBadge() {
   return (
     <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="10"
-        height="10"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="text-amber-500"
-      >
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-      </svg>
+      <Star size={10} className="text-amber-500" fill="currentColor" />
       <span className="text-[10px] font-medium text-amber-700 dark:text-amber-300">
         Nổi bật
       </span>
@@ -174,22 +146,7 @@ function FeaturedBadge() {
  */
 function ExternalLinkIcon() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-    >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
-    </svg>
+    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
   );
 }
 
@@ -208,21 +165,7 @@ function DetailMarkerInfo({ construction }: { construction: Construction }) {
       {/* Parent construction link */}
       {construction.parentTitle && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M9 17H7A5 5 0 0 1 7 7h2" />
-            <path d="M15 7h2a5 5 0 1 1 0 10h-2" />
-            <line x1="8" x2="16" y1="12" y2="12" />
-          </svg>
+          <Link2 size={10} />
           <span className="truncate">{construction.parentTitle}</span>
         </div>
       )}
@@ -230,20 +173,7 @@ function DetailMarkerInfo({ construction }: { construction: Construction }) {
       {/* Point type badge */}
       {pointType && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <circle cx="12" cy="12" r="4" />
-          </svg>
+          <CircleDot size={10} />
           <span>{getPointTypeLabel(pointType)}</span>
         </div>
       )}
@@ -251,20 +181,7 @@ function DetailMarkerInfo({ construction }: { construction: Construction }) {
       {/* Point order (for numbered points like stations) */}
       {pointOrder !== undefined && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
+          <Clock size={10} />
           <span>Thứ tự: {pointOrder}</span>
         </div>
       )}
@@ -272,20 +189,7 @@ function DetailMarkerInfo({ construction }: { construction: Construction }) {
       {/* Point description (additional info) */}
       {construction.pointDescription && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-            <line x1="4" x2="4" y1="22" y2="15" />
-          </svg>
+          <Flag size={10} />
           <span className="truncate">{construction.pointDescription}</span>
         </div>
       )}
@@ -293,20 +197,7 @@ function DetailMarkerInfo({ construction }: { construction: Construction }) {
       {/* Legacy: Connected roads for freeway exits */}
       {construction.connectedRoads && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-            <line x1="4" x2="4" y1="22" y2="15" />
-          </svg>
+          <Flag size={10} />
           <span className="truncate">{construction.connectedRoads}</span>
         </div>
       )}
@@ -452,20 +343,7 @@ function DevelopmentContent({
       {development.priceDisplay && (
         <div className="px-3 pb-2">
           <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="1" x2="12" y2="23" />
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
+            <DollarSign size={12} />
             <span>{development.priceDisplay}</span>
           </div>
         </div>

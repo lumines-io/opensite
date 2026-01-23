@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AlertCircle, AlertTriangle, Info, X, ChevronRight } from 'lucide-react';
 import type { ErrorModalData } from './ErrorModalContext';
 
 interface ErrorModalProps {
@@ -66,36 +67,9 @@ export function ErrorModal({ error, countdownDuration, onDismiss }: ErrorModalPr
   const styles = severityStyles[error.severity];
 
   const icons = {
-    error: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
-    warning: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-        />
-      </svg>
-    ),
-    info: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
+    error: <AlertCircle className="w-6 h-6" strokeWidth={2} />,
+    warning: <AlertTriangle className="w-6 h-6" strokeWidth={2} />,
+    info: <Info className="w-6 h-6" strokeWidth={2} />,
   };
 
   return (
@@ -139,14 +113,7 @@ export function ErrorModal({ error, countdownDuration, onDismiss }: ErrorModalPr
                 onClick={onDismiss}
                 className="flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800 transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="w-5 h-5" strokeWidth={2} />
               </button>
             </div>
 
@@ -157,19 +124,10 @@ export function ErrorModal({ error, countdownDuration, onDismiss }: ErrorModalPr
                   onClick={() => setShowDetails(!showDetails)}
                   className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 flex items-center gap-1"
                 >
-                  <svg
+                  <ChevronRight
                     className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-90' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                    strokeWidth={2}
+                  />
                   {showDetails ? 'Hide details' : 'Show details'}
                 </button>
                 <AnimatePresence>

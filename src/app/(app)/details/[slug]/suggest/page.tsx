@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getPayload } from 'payload';
 import config from '@payload-config';
 import Link from 'next/link';
+import { ChevronLeft, Info } from 'lucide-react';
 import { SuggestionForm, type ConstructionType, type ConstructionStatus } from '@/components/SuggestionForm';
 import { ContentPageTemplate } from '@/components/layout';
 import { Alert, Card } from '@/components/ui';
@@ -80,18 +81,14 @@ export default async function SuggestChangesPage({ params }: PageProps) {
         href={`/details/${slug}`}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeft className="w-4 h-4" />
         Back to {construction.title}
       </Link>
 
       {/* Current data summary */}
       <Card variant="outlined" className="mb-8 bg-muted/30">
         <h3 className="font-medium text-foreground mb-3 flex items-center gap-2">
-          <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <Info className="w-5 h-5 text-muted-foreground" />
           Current Project Data
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">

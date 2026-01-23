@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { X, List, ExternalLink } from 'lucide-react';
 import { STATUS_COLORS, TYPE_COLORS } from './construction-map.constants';
 import { getTypeLabel, getStatusLabel } from './construction-map.utils';
 import type { Construction } from './construction-map.types';
@@ -58,77 +59,6 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-/**
- * Close icon
- */
-function CloseIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-/**
- * List icon for the toggle button
- */
-function ListIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="8" y1="6" x2="21" y2="6" />
-      <line x1="8" y1="12" x2="21" y2="12" />
-      <line x1="8" y1="18" x2="21" y2="18" />
-      <line x1="3" y1="6" x2="3.01" y2="6" />
-      <line x1="3" y1="12" x2="3.01" y2="12" />
-      <line x1="3" y1="18" x2="3.01" y2="18" />
-    </svg>
-  );
-}
-
-/**
- * External link icon
- */
-function ExternalLinkIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-    >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
-    </svg>
-  );
-}
 
 /**
  * Single construction item in the list
@@ -162,7 +92,7 @@ function ConstructionItem({
               <h4 className="font-medium text-sm text-card-foreground line-clamp-1 group-hover:text-primary">
                 {construction.title}
               </h4>
-              <ExternalLinkIcon />
+              <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
             </Link>
             <StatusBadge status={construction.constructionStatus} />
           </div>
@@ -203,7 +133,7 @@ export function ConstructionListToggle({
       className="absolute top-4 left-4 bg-card rounded-lg shadow p-2.5 border border-border hover:bg-muted/50 transition-colors flex items-center gap-2"
       title="Xem danh sách công trình"
     >
-      <ListIcon />
+      <List size={20} />
       <span className="text-sm font-medium">{count}</span>
     </button>
   );
@@ -263,7 +193,7 @@ export function ConstructionListModal({
             onClick={onClose}
             className="p-1 hover:bg-muted rounded transition-colors text-muted-foreground hover:text-card-foreground"
           >
-            <CloseIcon />
+            <X size={20} />
           </button>
         </div>
 

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { RefreshCw, Building2 } from 'lucide-react';
 import { useAuth, ProtectedRoute } from '@/components/Auth';
 import { ContentPageTemplate } from '@/components/layout';
 import { Badge, Button, Alert } from '@/components/ui';
@@ -230,19 +231,7 @@ function SponsorProjectsContent() {
             disabled={isLoading}
             className="ml-auto px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-2"
           >
-            <svg
-              className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
         </div>
@@ -278,19 +267,7 @@ function SponsorProjectsContent() {
       {/* Empty state */}
       {!isLoading && !error && constructions.length === 0 && (
         <div className="text-center py-12 bg-card border border-border rounded-xl">
-          <svg
-            className="w-16 h-16 mx-auto text-muted-foreground mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-            />
-          </svg>
+          <Building2 className="w-16 h-16 mx-auto text-muted-foreground mb-4" strokeWidth={1.5} />
           <h3 className="text-lg font-semibold text-foreground mb-2">No projects yet</h3>
           <p className="text-muted-foreground mb-4">
             Start by creating your first construction project.

@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { X, ExternalLink, Check, Pencil } from 'lucide-react';
 import {
   Suggestion,
   SuggestionStatus,
@@ -147,9 +148,7 @@ export function SuggestionDetail({ suggestion, onClose, onUpdate }: SuggestionDe
               onClick={onClose}
               className="p-2 hover:bg-muted rounded-full transition-colors"
             >
-              <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-5 h-5 text-foreground" />
             </button>
           </div>
         </div>
@@ -240,14 +239,7 @@ export function SuggestionDetail({ suggestion, onClose, onUpdate }: SuggestionDe
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                          />
-                        </svg>
+                        <ExternalLink className="w-4 h-4" />
                         {evidence.url}
                       </a>
                     </li>
@@ -266,14 +258,7 @@ export function SuggestionDetail({ suggestion, onClose, onUpdate }: SuggestionDe
                   rel="noopener noreferrer"
                   className="text-sm text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                    />
-                  </svg>
+                  <ExternalLink className="w-4 h-4" />
                   {suggestion.sourceUrl}
                 </a>
                 {suggestion.sourceConfidence !== undefined && (
@@ -381,9 +366,7 @@ export function SuggestionDetail({ suggestion, onClose, onUpdate }: SuggestionDe
                     disabled={isUpdating}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <Check className="w-4 h-4" />
                     Phê duyệt
                   </button>
                   <button
@@ -391,9 +374,7 @@ export function SuggestionDetail({ suggestion, onClose, onUpdate }: SuggestionDe
                     disabled={isUpdating}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-4 h-4" />
                     Từ chối
                   </button>
                   <button
@@ -401,14 +382,7 @@ export function SuggestionDetail({ suggestion, onClose, onUpdate }: SuggestionDe
                     disabled={isUpdating}
                     className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
+                    <Pencil className="w-4 h-4" />
                     Yêu cầu sửa đổi
                   </button>
                 </>

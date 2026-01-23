@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { X, Search, Loader2, Filter } from 'lucide-react';
 import { getStatusColor, getStatusLabel, getTypeLabel } from '@/lib/construction-utils';
 import { useAnimatedVisibility } from '@/hooks/useAnimatedVisibility';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
@@ -236,19 +237,7 @@ export function FilterSearchOverlay({
               onClick={onClose}
               className="p-2 hover:bg-muted rounded-full transition-colors"
             >
-              <svg
-                className="w-5 h-5 text-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X className="w-5 h-5 text-foreground" />
             </button>
           </div>
 
@@ -264,40 +253,10 @@ export function FilterSearchOverlay({
             />
             {isLoading ? (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <svg
-                  className="w-5 h-5 animate-spin text-muted-foreground"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <svg
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             )}
           </div>
 
@@ -311,14 +270,7 @@ export function FilterSearchOverlay({
                   : 'bg-muted text-foreground hover:bg-muted/80'
               }`}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
+              <Filter className="w-4 h-4" />
               <span>Bộ lọc</span>
               {activeFilterCount > 0 && (
                 <span className="px-1.5 py-0.5 text-caption bg-white text-amber-600 rounded-full">
@@ -437,19 +389,7 @@ export function FilterSearchOverlay({
             </div>
           ) : results.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              <svg
-                className="w-12 h-12 mx-auto mb-3 opacity-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <Search className="w-12 h-12 mx-auto mb-3 opacity-50" strokeWidth={1.5} />
               <p className="text-body-sm">
                 {filters.query || hasActiveFilters
                   ? 'Không tìm thấy công trình nào phù hợp.'

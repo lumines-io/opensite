@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useField, useFormFields } from '@payloadcms/ui';
 import Map, { NavigationControl, GeolocateControl, Marker } from 'react-map-gl/mapbox';
+import { Map as MapIcon, ClipboardList } from 'lucide-react';
 import type { MapRef } from 'react-map-gl/mapbox';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -504,11 +505,7 @@ export const GeometryMapField: React.FC<GeometryMapFieldProps> = ({ path, readOn
                   gap: '6px',
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
-                  <path d="M8 2v16" />
-                  <path d="M16 6v16" />
-                </svg>
+                <MapIcon size={16} />
                 {showMap ? 'Hide Map' : 'Edit on Map'}
               </button>
               <button
@@ -526,10 +523,7 @@ export const GeometryMapField: React.FC<GeometryMapFieldProps> = ({ path, readOn
                   gap: '6px',
                 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-                </svg>
+                <ClipboardList size={14} />
                 Edit JSON
               </button>
             </>

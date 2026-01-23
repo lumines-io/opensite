@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { usePayloadAPI } from '@payloadcms/ui';
+import { Clock, Check, PauseCircle, AlertTriangle } from 'lucide-react';
 
 interface CronJob {
   id: string;
@@ -147,36 +148,28 @@ export const ScraperManagementView: React.FC = () => {
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--teal">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Clock size={20} />
           </div>
           <div className="stat-card__value">{stats.total}</div>
           <div className="stat-card__label">Total Jobs</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--green">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <Check size={20} />
           </div>
           <div className="stat-card__value">{stats.enabled}</div>
           <div className="stat-card__label">Enabled</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--amber">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <PauseCircle size={20} />
           </div>
           <div className="stat-card__value">{stats.disabled}</div>
           <div className="stat-card__label">Disabled</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--red">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+            <AlertTriangle size={20} />
           </div>
           <div className="stat-card__value">{stats.failed}</div>
           <div className="stat-card__label">Last Run Failed</div>
@@ -278,9 +271,7 @@ export const ScraperManagementView: React.FC = () => {
       ) : (
         <div className="empty-state">
           <div className="empty-state__icon">
-            <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Clock size={64} />
           </div>
           <div className="empty-state__title">No cron jobs found</div>
           <div className="empty-state__description">

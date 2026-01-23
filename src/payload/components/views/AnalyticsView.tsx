@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { usePayloadAPI } from '@payloadcms/ui';
+import { Building2, Check, ClipboardList, Users } from 'lucide-react';
 
 interface Suggestion {
   id: string;
@@ -201,36 +202,28 @@ export const AnalyticsView: React.FC = () => {
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--teal">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
+            <Building2 size={20} />
           </div>
           <div className="stat-card__value">{analytics.monthlyStats.newConstructions}</div>
           <div className="stat-card__label">New Constructions</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--green">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <Check size={20} />
           </div>
           <div className="stat-card__value">{analytics.monthlyStats.completedConstructions}</div>
           <div className="stat-card__label">Completed</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--amber">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
+            <ClipboardList size={20} />
           </div>
           <div className="stat-card__value">{analytics.monthlyStats.newSuggestions}</div>
           <div className="stat-card__label">New Suggestions</div>
         </div>
         <div className="stat-card">
           <div className="stat-card__icon stat-card__icon--purple">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
+            <Users size={20} />
           </div>
           <div className="stat-card__value">{analytics.monthlyStats.newUsers}</div>
           <div className="stat-card__label">New Users</div>

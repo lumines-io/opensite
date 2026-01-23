@@ -2,6 +2,20 @@ import { notFound } from 'next/navigation';
 import { getPayload } from 'payload';
 import config from '@payload-config';
 import Link from 'next/link';
+import {
+  ChevronLeft,
+  Pencil,
+  Map,
+  DollarSign,
+  Clock,
+  Building2,
+  Calendar,
+  FileText,
+  ClipboardList,
+  MapPin,
+  Link as LinkIcon,
+  ExternalLink,
+} from 'lucide-react';
 import { ChangelogTimeline } from '@/components/ChangelogTimeline';
 import { ImageGallery } from './ImageGallery';
 import { ProgressRing } from './ProgressRing';
@@ -151,9 +165,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors group"
           >
             <span className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <ChevronLeft className="w-4 h-4" />
             </span>
             <span className="font-medium">Quay lại</span>
           </Link>
@@ -163,18 +175,14 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
               href={`/details/${slug}/suggest`}
               className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors text-sm font-medium shadow-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
+              <Pencil className="w-4 h-4" />
               Đề xuất thay đổi
             </Link>
             <Link
               href={`/?construction=${slug}`}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
+              <Map className="w-4 h-4" />
               Xem trên bản đồ
             </Link>
           </div>
@@ -222,9 +230,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
                 {construction.details?.budget && (
                   <div className="flex items-center gap-2">
                     <span className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <DollarSign className="w-4 h-4 text-emerald-600" />
                     </span>
                     <div>
                       <p className="text-xs text-slate-500">Ngân sách</p>
@@ -236,9 +242,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
                 {daysInfo && (
                   <div className="flex items-center gap-2">
                     <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${daysInfo.overdue ? 'bg-red-100' : 'bg-blue-100'}`}>
-                      <svg className={`w-4 h-4 ${daysInfo.overdue ? 'text-red-600' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <Clock className={`w-4 h-4 ${daysInfo.overdue ? 'text-red-600' : 'text-blue-600'}`} />
                     </span>
                     <div>
                       <p className="text-xs text-slate-500">{daysInfo.label}</p>
@@ -252,9 +256,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
                 {construction.details?.contractor && (
                   <div className="flex items-center gap-2">
                     <span className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
+                      <Building2 className="w-4 h-4 text-purple-600" />
                     </span>
                     <div>
                       <p className="text-xs text-slate-500">Nhà thầu</p>
@@ -279,9 +281,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
             <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
                 <span className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <Calendar className="w-4 h-4 text-orange-600" />
                 </span>
                 Tiến trình dự án
               </h2>
@@ -300,9 +300,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
               <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-6">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <span className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                    <FileText className="w-4 h-4 text-slate-600" />
                   </span>
                   Mô tả dự án
                 </h2>
@@ -317,9 +315,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
               <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-6">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <span className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
+                    <ClipboardList className="w-4 h-4 text-indigo-600" />
                   </span>
                   Chi tiết dự án
                 </h2>
@@ -351,9 +347,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
               <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-6">
                 <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
                   <span className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
+                    <MapPin className="w-4 h-4 text-purple-600" />
                   </span>
                   Các ga Metro ({construction.metroStations.length})
                 </h2>
@@ -385,9 +379,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
               <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-6">
                 <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <span className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
+                    <LinkIcon className="w-4 h-4 text-cyan-600" />
                   </span>
                   Nguồn tham khảo
                 </h3>
@@ -401,9 +393,7 @@ export default async function ConstructionDetailPage({ params }: PageProps) {
                         className="block p-3 -mx-3 rounded-lg hover:bg-slate-50 transition-colors"
                       >
                         <div className="flex items-start gap-2">
-                          <svg className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
+                          <ExternalLink className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0 group-hover:text-blue-500 transition-colors" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-slate-700 group-hover:text-blue-600 transition-colors truncate">
                               {source.title || source.url}

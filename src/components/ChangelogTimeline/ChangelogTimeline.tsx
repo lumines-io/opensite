@@ -1,6 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import {
+  ArrowRight,
+  Clock,
+  Loader2,
+  AlertCircle,
+  User,
+  ChevronUp,
+  ChevronDown,
+  ExternalLink,
+} from 'lucide-react';
 
 interface ChangelogEntry {
   id: string;
@@ -196,9 +206,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
           return (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-500">{STATUS_LABELS[entry.statusChange.previousStatus]}</span>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <ArrowRight className="w-4 h-4 text-gray-400" />
               <span className="font-medium text-blue-600">{STATUS_LABELS[entry.statusChange.newStatus]}</span>
             </div>
           );
@@ -213,9 +221,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
           return (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-500">{prev}%</span>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <ArrowRight className="w-4 h-4 text-gray-400" />
               <span className="font-medium text-green-600">{next}%</span>
               {diff > 0 && (
                 <span className="text-xs text-green-500">(+{diff}%)</span>
@@ -239,9 +245,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
                 {entry.timelineChange.previousDate ? (
                   <>
                     <span className="text-gray-500">{formatDate(entry.timelineChange.previousDate)}</span>
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
+                    <ArrowRight className="w-4 h-4 text-gray-400" />
                     <span className="font-medium text-orange-600">{formatDate(entry.timelineChange.newDate)}</span>
                   </>
                 ) : (
@@ -272,10 +276,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <svg className="w-6 h-6 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
         <span className="ml-2 text-gray-500">Đang tải...</span>
       </div>
     );
@@ -284,9 +285,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
   if (error) {
     return (
       <div className="text-center py-8 text-red-500">
-        <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <AlertCircle className="w-8 h-8 mx-auto mb-2" />
         <p>{error}</p>
       </div>
     );
@@ -297,9 +296,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
       {showHeader && (
         <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
           <span className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
-            <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Clock className="w-4 h-4 text-amber-600" />
           </span>
           Lịch sử thay đổi
         </h3>
@@ -307,9 +304,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
 
       {changelog.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300" strokeWidth={1.5} />
           <p>Chưa có lịch sử thay đổi</p>
         </div>
       ) : (
@@ -344,9 +339,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
                         {entry.author && (
                           <>
                             <span className="flex items-center gap-1">
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
+                              <User className="w-3 h-3" />
                               {entry.author.name}
                             </span>
                             <span className="text-slate-300">•</span>
@@ -378,16 +371,12 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
                           >
                             {isExpanded ? (
                               <>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                </svg>
+                                <ChevronUp className="w-3 h-3" />
                                 Thu gọn
                               </>
                             ) : (
                               <>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
+                                <ChevronDown className="w-3 h-3" />
                                 Xem thêm
                               </>
                             )}
@@ -404,9 +393,7 @@ export function ChangelogTimeline({ slug, maxItems = 20, showHeader = true }: Ch
                         rel="noopener noreferrer"
                         className="text-xs text-blue-500 hover:underline mt-2 inline-flex items-center gap-1"
                       >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
+                        <ExternalLink className="w-3 h-3" />
                         {entry.source.title || 'Nguồn'}
                       </a>
                     )}

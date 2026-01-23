@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { ChevronDown, Check } from 'lucide-react';
 import { locales, localeNames, localeFlags, type Locale } from '@/i18n/config';
 
 export function LanguageSwitcher() {
@@ -62,14 +63,10 @@ export function LanguageSwitcher() {
       >
         <span className="text-base">{localeFlags[locale]}</span>
         <span className="hidden sm:inline text-foreground">{localeNames[locale]}</span>
-        <svg
+        <ChevronDown
           className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+          strokeWidth={2}
+        />
       </button>
 
       {isOpen && (
@@ -85,13 +82,7 @@ export function LanguageSwitcher() {
               <span className="text-base">{localeFlags[l]}</span>
               <span className="text-foreground">{localeNames[l]}</span>
               {l === locale && (
-                <svg className="w-4 h-4 ml-auto text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <Check className="w-4 h-4 ml-auto text-blue-600" />
               )}
             </button>
           ))}
