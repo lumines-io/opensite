@@ -172,17 +172,166 @@ export function getMarkerColor(construction: Construction): string {
 }
 
 /**
- * Create SVG marker icon for Google Maps
+ * Marker style options for customization
+ */
+export interface MarkerStyleOptions {
+  size?: number;
+  strokeWidth?: number;
+  strokeColor?: string;
+  opacity?: number;
+  pulseSpeed?: 'slow' | 'normal' | 'fast';
+  pulseScale?: number;
+  shadow?: boolean;
+  glow?: boolean;
+  glowColor?: string;
+  shape?: 'circle' | 'square' | 'diamond' | 'pin';
+}
+
+const PULSE_DURATIONS = {
+  slow: '2.5s',
+  normal: '1.5s',
+  fast: '0.8s',
+};
+
+/**
+ * Create SVG marker icon for Google Maps with customization options
  */
 export function createMarkerIcon(
   color: string,
-  size: number = 24
+  options: MarkerStyleOptions = {}
 ): google.maps.Icon {
+  const {
+    size = 24,
+    strokeWidth = 2,
+    strokeColor = 'white',
+    opacity = 1,
+    shadow = false,
+    glow = false,
+    glowColor,
+    shape = 'circle',
+  } = options;
+
+  const actualGlowColor = glowColor || color;
+  const shadowFilter = shadow
+    ? `<filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.3"/>
+       </filter>`
+    : '';
+  const glowFilter = glow
+    ? `<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+       </filter>`
+    : '';
+
+  const filterAttr = shadow ? 'filter="url(#shadow)"' : glow ? 'filter="url(#glow)"' : '';
+
+  let shapeElement: string;
+  switch (shape) {
+    case 'square':
+      shapeElement = `<rect x="4" y="4" width="16" height="16" rx="2" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" opacity="${opacity}" ${filterAttr}/>`;
+      break;
+    case 'diamond':
+      shapeElement = `<polygon points="12,2 22,12 12,22 2,12" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" opacity="${opacity}" ${filterAttr}/>`;
+      break;
+    case 'pin':
+      shapeElement = `<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth * 0.5}" opacity="${opacity}" ${filterAttr}/>`;
+      break;
+    default: // circle
+      shapeElement = `<circle cx="12" cy="12" r="10" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" opacity="${opacity}" ${filterAttr}/>`;
+  }
+
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/>
+      <defs>${shadowFilter}${glowFilter}</defs>
+      ${shapeElement}
     </svg>
   `;
+
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(size, size),
+    anchor: new google.maps.Point(size / 2, shape === 'pin' ? size : size / 2),
+  };
+}
+
+/**
+ * Create pulsing marker icon (for in-progress constructions) with customization
+ */
+export function createPulsingMarkerIcon(
+  color: string,
+  options: MarkerStyleOptions = {}
+): google.maps.Icon {
+  const {
+    size = 24,
+    strokeWidth = 2,
+    strokeColor = 'white',
+    pulseSpeed = 'normal',
+    pulseScale = 1.25,
+    glow = true,
+    glowColor,
+    shape = 'circle',
+  } = options;
+
+  const duration = PULSE_DURATIONS[pulseSpeed];
+  const actualGlowColor = glowColor || color;
+
+  // Calculate animation values based on shape
+  const baseRadius = 8;
+  const maxRadius = baseRadius * pulseScale;
+
+  let shapeElement: string;
+  let pulseRing: string;
+
+  switch (shape) {
+    case 'square':
+      pulseRing = `
+        <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="${actualGlowColor}" stroke-width="2" opacity="0.5">
+          <animate attributeName="width" values="16;20;16" dur="${duration}" repeatCount="indefinite"/>
+          <animate attributeName="height" values="16;20;16" dur="${duration}" repeatCount="indefinite"/>
+          <animate attributeName="x" values="4;2;4" dur="${duration}" repeatCount="indefinite"/>
+          <animate attributeName="y" values="4;2;4" dur="${duration}" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0.2;0.5" dur="${duration}" repeatCount="indefinite"/>
+        </rect>
+      `;
+      shapeElement = `<rect x="4" y="4" width="16" height="16" rx="2" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>`;
+      break;
+    case 'diamond':
+      pulseRing = `
+        <polygon points="12,2 22,12 12,22 2,12" fill="none" stroke="${actualGlowColor}" stroke-width="2" opacity="0.5">
+          <animate attributeName="opacity" values="0.5;0.2;0.5" dur="${duration}" repeatCount="indefinite"/>
+        </polygon>
+      `;
+      shapeElement = `
+        <polygon points="12,2 22,12 12,22 2,12" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}">
+          <animateTransform attributeName="transform" type="scale" values="1;${pulseScale};1" dur="${duration}" repeatCount="indefinite" additive="sum"/>
+        </polygon>
+      `;
+      break;
+    default: // circle
+      pulseRing = `
+        <circle cx="12" cy="12" r="${maxRadius}" fill="none" stroke="${actualGlowColor}" stroke-width="2" opacity="0">
+          <animate attributeName="r" values="${baseRadius};${maxRadius + 2};${baseRadius}" dur="${duration}" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0;0.6" dur="${duration}" repeatCount="indefinite"/>
+        </circle>
+      `;
+      shapeElement = `
+        <circle cx="12" cy="12" r="${baseRadius}" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}">
+          <animate attributeName="r" values="${baseRadius};${baseRadius * 1.1};${baseRadius}" dur="${duration}" repeatCount="indefinite"/>
+        </circle>
+      `;
+  }
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+      ${pulseRing}
+      ${shapeElement}
+    </svg>
+  `;
+
   return {
     url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
     scaledSize: new google.maps.Size(size, size),
@@ -191,32 +340,113 @@ export function createMarkerIcon(
 }
 
 /**
- * Create pulsing marker icon (for in-progress constructions)
+ * Create a status-based marker with appropriate styling
  */
-export function createPulsingMarkerIcon(
+export function createStatusMarkerIcon(
   color: string,
-  size: number = 24
+  status: string,
+  constructionType: string,
+  options: MarkerStyleOptions = {}
 ): google.maps.Icon {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2">
-        <animate attributeName="r" values="8;10;8" dur="1.5s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="1;0.7;1" dur="1.5s" repeatCount="indefinite"/>
-      </circle>
-    </svg>
-  `;
-  return {
-    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-    scaledSize: new google.maps.Size(size, size),
-    anchor: new google.maps.Point(size / 2, size / 2),
+  const isPulsing = status === 'in-progress';
+
+  // Customize based on construction type
+  const typeOptions: MarkerStyleOptions = {
+    ...options,
+    shape: getShapeForType(constructionType),
+    size: getSizeForType(constructionType, options.size),
   };
+
+  if (isPulsing) {
+    return createPulsingMarkerIcon(color, {
+      ...typeOptions,
+      pulseSpeed: 'normal',
+      glow: true,
+    });
+  }
+
+  // Completed constructions get a subtle glow
+  if (status === 'completed') {
+    return createMarkerIcon(color, {
+      ...typeOptions,
+      glow: true,
+      opacity: 0.9,
+    });
+  }
+
+  // Paused constructions are dimmed
+  if (status === 'paused') {
+    return createMarkerIcon(color, {
+      ...typeOptions,
+      opacity: 0.6,
+    });
+  }
+
+  return createMarkerIcon(color, typeOptions);
+}
+
+/**
+ * Get marker shape based on construction type
+ */
+function getShapeForType(type: string): MarkerStyleOptions['shape'] {
+  switch (type) {
+    case 'metro':
+    case 'station':
+      return 'square';
+    case 'interchange':
+      return 'diamond';
+    default:
+      return 'circle';
+  }
+}
+
+/**
+ * Get marker size based on construction type
+ */
+function getSizeForType(type: string, defaultSize?: number): number {
+  const baseSize = defaultSize || 20;
+  switch (type) {
+    case 'highway':
+    case 'metro':
+      return baseSize * 1.2;
+    case 'bridge':
+    case 'interchange':
+      return baseSize * 1.1;
+    default:
+      return baseSize;
+  }
+}
+
+/**
+ * Line style options for customization
+ */
+export interface LineStyleOptions {
+  strokeWeight?: number;
+  strokeOpacity?: number;
+  dashPattern?: number[];
+  zIndex?: number;
+}
+
+/**
+ * Polygon style options for customization
+ */
+export interface PolygonStyleOptions {
+  fillOpacity?: number;
+  strokeWeight?: number;
+  strokeOpacity?: number;
+  zIndex?: number;
 }
 
 /**
  * Get Data Layer style for a construction feature
  */
 export function getFeatureStyle(
-  feature: google.maps.Data.Feature
+  feature: google.maps.Data.Feature,
+  customOptions?: {
+    marker?: MarkerStyleOptions;
+    line?: LineStyleOptions;
+    polygon?: PolygonStyleOptions;
+  }
 ): google.maps.Data.StyleOptions {
   const type = feature.getProperty('constructionType') as string;
   const status = feature.getProperty('constructionStatus') as string;
@@ -236,39 +466,73 @@ export function getFeatureStyle(
 
   // Determine if it should pulse (in-progress)
   const isPulsing = status === 'in-progress';
+  const isPaused = status === 'paused';
+  const isCompleted = status === 'completed';
 
   // Style based on geometry type
   switch (geometryType) {
     case 'Point':
       return {
-        icon: isPulsing
-          ? createPulsingMarkerIcon(color, 20)
-          : createMarkerIcon(color, 20),
+        icon: createStatusMarkerIcon(color, status, type, customOptions?.marker),
         clickable: true,
+        zIndex: isPulsing ? 100 : isCompleted ? 50 : 75,
       };
 
-    case 'LineString':
+    case 'LineString': {
+      const lineOptions = customOptions?.line || {};
+      // Base width varies by type
+      const baseWeight = getLineWeightForType(type);
+      const weight = isPulsing ? baseWeight * 1.2 : baseWeight;
+      const opacity = isPaused ? 0.5 : isPulsing ? 0.85 : 1;
+
       return {
         strokeColor: color,
-        strokeWeight: isPulsing ? 5 : 4,
-        strokeOpacity: isPulsing ? 0.8 : 1,
+        strokeWeight: lineOptions.strokeWeight ?? weight,
+        strokeOpacity: lineOptions.strokeOpacity ?? opacity,
         clickable: true,
+        zIndex: lineOptions.zIndex ?? (isPulsing ? 100 : 50),
       };
+    }
 
-    case 'Polygon':
+    case 'Polygon': {
+      const polygonOptions = customOptions?.polygon || {};
+      const fillOpacity = isPaused ? 0.1 : isPulsing ? 0.35 : isCompleted ? 0.25 : 0.2;
+      const strokeOpacity = isPaused ? 0.5 : 1;
+
       return {
         fillColor: color,
-        fillOpacity: isPulsing ? 0.3 : 0.2,
+        fillOpacity: polygonOptions.fillOpacity ?? fillOpacity,
         strokeColor: color,
-        strokeWeight: 2,
-        strokeOpacity: 1,
+        strokeWeight: polygonOptions.strokeWeight ?? 2,
+        strokeOpacity: polygonOptions.strokeOpacity ?? strokeOpacity,
         clickable: true,
+        zIndex: polygonOptions.zIndex ?? (isPulsing ? 100 : 50),
       };
+    }
 
     default:
       return {
         clickable: true,
       };
+  }
+}
+
+/**
+ * Get line weight based on construction type
+ */
+function getLineWeightForType(type: string): number {
+  switch (type) {
+    case 'highway':
+      return 6;
+    case 'metro':
+      return 5;
+    case 'bridge':
+    case 'tunnel':
+      return 5;
+    case 'interchange':
+      return 4;
+    default:
+      return 4;
   }
 }
 

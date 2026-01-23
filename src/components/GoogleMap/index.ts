@@ -56,10 +56,18 @@ export {
   getMarkerColor,
   createMarkerIcon,
   createPulsingMarkerIcon,
+  createStatusMarkerIcon,
   getFeatureStyle,
   featurePassesFilters,
   isInBounds,
   isGeometryInBounds,
   calculateFeaturesBounds,
   routeToGooglePath,
+} from './google-map.utils';
+
+// Style option types for customization
+export type {
+  MarkerStyleOptions,
+  LineStyleOptions,
+  PolygonStyleOptions,
 } from './google-map.utils';
