@@ -82,6 +82,7 @@ export function GoogleConstructionMap({
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const viewportTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasFlownToUserLocation = useRef(false);
+  const isMouseInPopupRef = useRef(false);
 
   const { theme } = useTheme();
 
@@ -574,6 +575,20 @@ export function GoogleConstructionMap({
       styles: theme === 'dark' ? GOOGLE_MAP_DARK_STYLE : GOOGLE_MAP_LIGHT_STYLE,
     });
 
+    // Add click listener to close popup when clicking on empty map area
+    map.addListener('click', () => {
+      // Only close if not clicking on a feature (handled separately)
+      if (!isMouseInPopupRef.current) {
+        setActiveConstruction(null);
+        setPopupPosition(null);
+        setIsMouseInPopup(false);
+        if (hideTimeoutRef.current) {
+          clearTimeout(hideTimeoutRef.current);
+          hideTimeoutRef.current = null;
+        }
+      }
+    });
+
     // Initial computation of visible constructions
     setTimeout(computeVisibleConstructions, 100);
   }, [theme, computeVisibleConstructions]);
@@ -658,6 +673,7 @@ export function GoogleConstructionMap({
   // Handle popup mouse events
   const handlePopupMouseEnter = useCallback(() => {
     setIsMouseInPopup(true);
+    isMouseInPopupRef.current = true;
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
@@ -666,6 +682,7 @@ export function GoogleConstructionMap({
 
   const handlePopupMouseLeave = useCallback(() => {
     setIsMouseInPopup(false);
+    isMouseInPopupRef.current = false;
     scheduleHidePopup();
   }, [scheduleHidePopup]);
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
-import { InfoWindow } from '@react-google-maps/api';
+import { useRef, useCallback, useEffect, useState } from 'react';
+import { OverlayView } from '@react-google-maps/api';
 import { STATUS_COLORS, CATEGORY_COLORS } from './google-map.constants';
 import {
   getTypeColor,
@@ -148,7 +148,29 @@ function ExternalLinkIcon() {
 }
 
 /**
- * Google Maps InfoWindow for construction details
+ * Close icon
+ */
+function CloseIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+/**
+ * Google Maps custom popup for construction details with animations
  */
 export function GoogleMapInfoWindow({
   construction,
@@ -162,6 +184,18 @@ export function GoogleMapInfoWindow({
   const statusColor = STATUS_COLORS[construction.constructionStatus];
   const hasDateInfo = construction.startDate || construction.expectedEndDate;
   const isPrivate = construction.constructionCategory === 'private';
+
+  // Animation state
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Trigger enter animation on mount
+  useEffect(() => {
+    // Small delay to ensure DOM is ready for animation
+    const timer = requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+    return () => cancelAnimationFrame(timer);
+  }, []);
 
   const detailsUrl = construction.slug
     ? `/details/${construction.slug}`
@@ -179,6 +213,15 @@ export function GoogleMapInfoWindow({
   const handleMouseLeave = useCallback(() => {
     onMouseLeave?.();
   }, [onMouseLeave]);
+
+  const handleClose = useCallback(() => {
+    // Trigger exit animation
+    setIsVisible(false);
+    // Wait for animation to complete before calling onClose
+    setTimeout(() => {
+      onClose();
+    }, 150);
+  }, [onClose]);
 
   const handleNavigate = useCallback(
     (e: React.MouseEvent) => {
@@ -204,20 +247,33 @@ export function GoogleMapInfoWindow({
   );
 
   return (
-    <InfoWindow
+    <OverlayView
       position={position}
-      onCloseClick={onClose}
-      options={{
-        pixelOffset: new google.maps.Size(0, -10),
-        disableAutoPan: true,
-      }}
+      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      getPixelPositionOffset={(width, height) => ({
+        x: -(width / 2),
+        y: -(height + 15),
+      })}
     >
       <div
         ref={containerRef}
-        className="min-w-[260px] max-w-[320px] bg-card"
+        className={`
+          min-w-[260px] max-w-[320px] bg-card rounded-lg shadow-lg border border-border
+          transition-all duration-150 ease-out
+          ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95'}
+        `}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted/80 transition-colors text-muted-foreground hover:text-foreground z-10"
+          aria-label="Close"
+        >
+          <CloseIcon />
+        </button>
+
         {/* Sponsor badge for private constructions */}
         {isPrivate && (
           <div className="px-3 pt-2">
@@ -228,7 +284,7 @@ export function GoogleMapInfoWindow({
         {/* Clickable Header */}
         <button
           onClick={handleNavigate}
-          className="group flex items-start gap-2.5 p-3 pb-2 hover:bg-muted/50 rounded-t-lg transition-colors cursor-pointer w-full text-left"
+          className="group flex items-start gap-2.5 p-3 pb-2 pr-8 hover:bg-muted/50 rounded-t-lg transition-colors cursor-pointer w-full text-left"
         >
           <TypeBadge
             type={construction.constructionType}
@@ -281,7 +337,11 @@ export function GoogleMapInfoWindow({
             </div>
           )}
         </div>
+
+        {/* Pointer triangle */}
+        <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-card" />
+        <div className="absolute left-1/2 -translate-x-1/2 -bottom-[9px] w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-border -z-10" />
       </div>
-    </InfoWindow>
+    </OverlayView>
   );
 }
