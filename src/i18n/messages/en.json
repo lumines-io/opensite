@@ -102,7 +102,9 @@
   "home": {
     "searchConstruction": "Search constructions",
     "mapboxRequired": "Mapbox Token Required",
-    "mapboxRequiredDesc": "Add NEXT_PUBLIC_MAPBOX_TOKEN to your environment variables to display the map."
+    "mapboxRequiredDesc": "Add NEXT_PUBLIC_MAPBOX_TOKEN to your environment variables to display the map.",
+    "googleMapsRequired": "Google Maps API Key Required",
+    "googleMapsRequiredDesc": "Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your environment variables to display the map."
   },
   "construction": {
     "status": {

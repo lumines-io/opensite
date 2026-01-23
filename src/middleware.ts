@@ -31,11 +31,11 @@ const SECURITY_HEADERS: Record<string, string> = {
  */
 const CSP_DIRECTIVES = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com",
-  "style-src 'self' 'unsafe-inline' https://api.mapbox.com",
-  "img-src 'self' data: blob: https://*.mapbox.com https://*.googleapis.com",
-  "font-src 'self'",
-  "connect-src 'self' https://*.mapbox.com https://api.mapbox.com https://events.mapbox.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://maps.googleapis.com",
+  "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com",
+  "img-src 'self' data: blob: https://*.mapbox.com https://*.googleapis.com https://*.gstatic.com https://maps.googleapis.com https://maps.gstatic.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "connect-src 'self' https://*.mapbox.com https://api.mapbox.com https://events.mapbox.com https://maps.googleapis.com https://roads.googleapis.com",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",

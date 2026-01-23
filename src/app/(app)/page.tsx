@@ -1,7 +1,7 @@
 import { HomePage } from '@/components/HomePage';
 
 export default function Home() {
-  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
-  return <HomePage mapboxToken={mapboxToken} />;
+  return <HomePage googleMapsApiKey={googleMapsApiKey} />;
 }

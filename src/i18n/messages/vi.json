@@ -102,7 +102,9 @@
   "home": {
     "searchConstruction": "Tìm công trình",
     "mapboxRequired": "Cần Mapbox Token",
-    "mapboxRequiredDesc": "Thêm NEXT_PUBLIC_MAPBOX_TOKEN vào biến môi trường để hiển thị bản đồ."
+    "mapboxRequiredDesc": "Thêm NEXT_PUBLIC_MAPBOX_TOKEN vào biến môi trường để hiển thị bản đồ.",
+    "googleMapsRequired": "Cần Google Maps API Key",
+    "googleMapsRequiredDesc": "Thêm NEXT_PUBLIC_GOOGLE_MAPS_API_KEY vào biến môi trường để hiển thị bản đồ."
   },
   "construction": {
     "status": {

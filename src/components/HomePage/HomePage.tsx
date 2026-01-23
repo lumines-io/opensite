@@ -3,17 +3,18 @@
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { MapSearchPanel, MapRoutingPanel } from '@/components/Map';
+import { GoogleMapSearchPanel } from '@/components/GoogleMap';
+import type { LatLng, ConstructionAlert } from '@/components/GoogleMap';
 import { FilterSearchOverlay } from '@/components/FilterSearchOverlay';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { UserMenu } from '@/components/Auth';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useFeatureFlag, FEATURE_FLAGS } from '@/lib/feature-flags/provider';
-import type { Construction, ConstructionAlert, SearchResultItem } from '@/types/construction';
+import type { Construction, SearchResultItem } from '@/types/construction';
 
 // Dynamically import heavy map component to prevent memory issues during dev compilation
-const ConstructionMap = dynamic(
-  () => import('@/components/Map/ConstructionMap').then(mod => ({ default: mod.ConstructionMap })),
+const GoogleConstructionMap = dynamic(
+  () => import('@/components/GoogleMap/GoogleConstructionMap').then(mod => ({ default: mod.GoogleConstructionMap })),
   {
     ssr: false,
     loading: () => (
@@ -28,13 +29,13 @@ const ConstructionMap = dynamic(
 );
 
 interface HomePageProps {
-  mapboxToken: string;
+  googleMapsApiKey: string;
 }
 
-export function HomePage({ mapboxToken }: HomePageProps) {
+export function HomePage({ googleMapsApiKey }: HomePageProps) {
   const t = useTranslations('home');
   const [isFilterSearchOpen, setIsFilterSearchOpen] = useState(false);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([106.6297, 10.8231]);
+  const [mapCenter, setMapCenter] = useState<LatLng>({ lat: 10.8231, lng: 106.6297 });
   const [mapZoom, setMapZoom] = useState(11);
   const [mapKey, setMapKey] = useState(0);
   const [currentRoute, setCurrentRoute] = useState<GeoJSON.LineString | null>(null);
@@ -46,7 +47,7 @@ export function HomePage({ mapboxToken }: HomePageProps) {
   const isThemeToggleEnabled = useFeatureFlag(FEATURE_FLAGS.FEATURE_THEME_TOGGLE);
   const isI18nEnabled = useFeatureFlag(FEATURE_FLAGS.FEATURE_I18N);
 
-  const handleLocationSelect = useCallback((center: [number, number], zoom: number) => {
+  const handleLocationSelect = useCallback((center: LatLng, zoom: number) => {
     setMapCenter(center);
     setMapZoom(zoom);
     setMapKey(prev => prev + 1); // Force map re-render to fly to new location
@@ -63,7 +64,7 @@ export function HomePage({ mapboxToken }: HomePageProps) {
   // Handle construction selection from panels
   const handleConstructionSelect = useCallback((construction: Construction | ConstructionAlert) => {
     if (construction.center) {
-      setMapCenter(construction.center);
+      setMapCenter({ lat: construction.center[1], lng: construction.center[0] });
       setMapZoom(15);
       setMapKey(prev => prev + 1);
     }
@@ -72,7 +73,7 @@ export function HomePage({ mapboxToken }: HomePageProps) {
   // Handle construction selection from filter search
   const handleFilterSearchSelect = useCallback((construction: SearchResultItem) => {
     if (construction.center) {
-      setMapCenter(construction.center);
+      setMapCenter({ lat: construction.center[1], lng: construction.center[0] });
       setMapZoom(15);
       setMapKey(prev => prev + 1);
     }
@@ -103,39 +104,32 @@ export function HomePage({ mapboxToken }: HomePageProps) {
 
       {/* Map */}
       <main className="h-full w-full">
-        {mapboxToken ? (
+        {googleMapsApiKey ? (
           <>
-            <ConstructionMap
+            <GoogleConstructionMap
               key={mapKey}
-              accessToken={mapboxToken}
+              apiKey={googleMapsApiKey}
               initialCenter={mapCenter}
               initialZoom={mapZoom}
               route={isRoutingEnabled ? currentRoute : null}
               routeAlerts={isRoutingEnabled ? routeAlerts : []}
             />
-            {/* Google Maps-style search and routing panels */}
-            <MapSearchPanel
-              accessToken={mapboxToken}
+            {/* Google Maps search panel */}
+            <GoogleMapSearchPanel
+              apiKey={googleMapsApiKey}
               onLocationSelect={handleLocationSelect}
               onConstructionSelect={handleConstructionSelect}
             />
-            {isRoutingEnabled && (
-              <MapRoutingPanel
-                accessToken={mapboxToken}
-                onRouteCalculated={handleRouteCalculated}
-                onConstructionSelect={handleConstructionSelect}
-              />
-            )}
           </>
         ) : (
           <div className="flex items-center justify-center h-full bg-muted">
             <div className="text-center p-8">
               <div className="text-4xl mb-4">🗺️</div>
               <h2 className="text-heading-lg text-foreground mb-2">
-                {t('mapboxRequired')}
+                {t('googleMapsRequired')}
               </h2>
               <p className="text-body-sm text-muted-foreground max-w-md">
-                {t('mapboxRequiredDesc')}
+                {t('googleMapsRequiredDesc')}
               </p>
             </div>
           </div>
