@@ -1,0 +1,36 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+permissions:
+  contents: write # Allow pushing back to this repository
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # to allow rewriting history if needed
+
+      - name: Set standard Git user info
+        run: |
+          git config --global user.name "Production Deployment"
+          git config --global user.email "admin@lumines.io"
+
+      - name: Amend last commit author (optional)
+        run: |
+          git commit --amend --reset-author --no-edit || echo "No changes to amend"
+
+      - name: Push amended commit back
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git
+          git push --force
